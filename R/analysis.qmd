@@ -1,0 +1,921 @@
+---
+title: "Supplement: Fremont Models"
+date: "`r Sys.Date()`"
+format:
+  html: 
+    embed-resources: true
+    fig-align: center
+    fig-dpi: 300
+    fig-responsive: true
+    number-sections: true
+    number-depth: 3
+    toc: true
+    toc-depth: 3
+    smooth-scroll: true
+    theme: cosmo
+    highlight-style: a11y
+execute: 
+  eval: true
+  echo: true
+  warning: false
+  error: false
+---
+
+## Overview
+
+**Goal**: model the distribution of Fremont sites across watersheds.
+
+**Data**: (i) site counts per watershed based on records from the State Historic Preservation Offices of Utah and Nevada and (ii) environmental data from the Oregon State University PRISM Group, as well as the USGS.
+
+**Method**: a GAMM with a negative binomial distribution for count data with dispersion, an an offset to account for the area of each watershed, and an exponential covariance matrix to account for residual spatial autocorrelation.
+
+## R Preamble
+
+```{r libraries}
+
+library(GGally)
+library(ggeffects)
+library(gratia)
+library(gt)
+library(here)
+library(mgcv)
+library(patchwork)
+library(sf)
+library(sfdep)
+library(tidyverse)
+library(viridis)
+
+```
+
+## Data
+
+Unit of analysis: watersheds  
+
+Dependent variable:  
+- a count of **sites** per watershed  
+
+Independent variables:  
+- **elevation**  
+- maize growing degree days (**gdd**, in Celsius)  
+- **precipitation** (millimeters)  
+- cost-distance (in hours) to **springs** and **streams**  
+- **protected** status  
+- cost-distance (in hours) to **roads**  
+
+The climate variables, precipitation and gdd, were hindcasted for each watershed using Kyle Bocinsky's [paleocar](https://github.com/bocinsky/paleocar) package and averaged over the approximately 1,000 year occupational sequence of the Fremont in the project area. The cost-distance variables are derived from elevation data using Campbell's hiking function and Djikstra's search algorithm and averaged over each watershed. Protected status refers to the proportion of each watershed that is federal land. Note that it and cost-distance to roads are not explanatory variables, but rather controls on potential sources of sampling bias, mostly due to taphonomic processes operating on the archaeological record - basically, modern farms and cities.  
+
+Offsets:  
+- **area** of each watershed  
+
+This is included to account for sampling bias owing to the size of each watershed. The other two are there to account for sampling bias owing to variable survey intensity, as well as the potential for human impacts to cultural resources.  
+
+**Note:** not all of these variables make it into the final model as we first evaluate them for potential colinearity and concurvity. An additional concurvity test is performed after fitting the final model. Not all of them have smooths applied in the final model, either.  
+
+```{r}
+
+gpkg <- here("data", "western-fremont.gpkg")
+
+utah <- read_sf(gpkg, "utah")
+
+watersheds <- read_sf(gpkg, "watersheds") |> 
+  mutate(
+    huc4 = str_sub(id, 1, 4),
+    huc4 = factor(huc4)
+  )
+
+```
+
+```{r}
+#| fig-height: 4
+#| code-fold: true
+#| fig-align: center
+
+max_density_obs <- with(watersheds, max(sites/area))
+
+obs <- ggplot() +
+  geom_sf(
+    data = utah,
+    fill = "gray95"
+  ) +
+  geom_sf(
+    data = watersheds, 
+    aes(fill = (sites/area)/max_density_obs),
+    color = "gray90", 
+    linewidth = 0.2
+  ) +
+  scale_fill_viridis(
+    name = "Relative\nSite Density",
+    option = "mako",
+    limits = c(0, 1)
+  ) +
+  # coord_sf(expand = FALSE) +
+  theme_void() +
+  theme(
+    legend.background = element_rect(fill = "gray95", color = "transparent"),
+    legend.justification = c("left", "top"),
+    legend.position = c(0.66, 0.57)
+  )
+
+obs
+
+```
+
+This map shows the relative density of sites based on their observed frequency in the study area. If site density is the ratio of the number of sites in a watershed to the area of that watershed, the _relative_ density is the density estimate for each watershed divided by the maximum density estimate across all watersheds. It is more appropriate to visualize this value as it doesn't have the same strong implications as visualizing the counts. (1) By visualizing the _density_, it does not make assumptions about the absence of sampling bias owing to the area of each watershed. (2) By visualizing the _relative_ density, it does not make assumptions about the total occurrence rate of sites across the study area, i,e, it does not include an estimate of the intercept.
+
+### Test for colinearity
+
+```{r}
+#| fig-height: 5
+#| fig-asp: 1
+#| code-fold: true
+#| out-width: "75%"
+#| fig-align: center
+
+diagonal_labels <- function(data, mapping, ...) {
+
+  GGally::ggally_text(
+    rlang::as_label(mapping$x),
+    col = "black",
+    size = 4
+  )
+  
+}
+
+correlations <- function(data, mapping, color = "black", ...) {
+  
+  # get the x and y data to use the other code
+  x <- GGally::eval_data_col(data, mapping$x)
+  y <- GGally::eval_data_col(data, mapping$y)
+
+  ct <- cor.test(x,y)
+
+  r <- unname(ct$estimate)
+  rt <- format(r, digits=2)[1]
+  tt <- as.character(rt)
+  
+  tt <- stringr::str_c(
+    tt, 
+    GGally::signif_stars(ct$p.value)
+  )
+
+  # plot the cor value
+  ggally_text(
+   label = tt, 
+   mapping = aes(),
+   xP = 0.5, 
+   yP = 0.5, 
+   size = 4,
+   color = color,
+   ...
+  )
+  
+}
+
+# there's a bug in ggpairs() where it mislabels the y-axis, so we remove the
+# text and ticks from this plot
+
+watersheds |> 
+  st_drop_geometry() |> 
+  select(elevation, precipitation, gdd, streams, springs, protected, roads) |> 
+  ggpairs(
+    diag = list(continuous = diagonal_labels),
+    lower = list(continuous = wrap("points", alpha = 0.3)),
+    upper = list(continuous = correlations)
+  ) +
+  theme_bw(12) +
+  theme(
+    panel.grid = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+```
+
+As you can see, there are strong, linear correlations between all the variables, including the familiar inverse relationship between precipitation and gdd, which is driven by elevation in the American West. Based on this and a previous post-hoc concurvity test, we will drop springs.
+
+### Map of covariates
+
+```{r}
+#| fig-width: 8
+#| fig-asp: 0.9
+#| code-fold: true
+#| fig-align: center
+
+make_map <- function(fill, name) {
+  
+  ggplot() +
+    geom_sf(
+      data = utah,
+      fill = "gray95"
+    ) +
+    geom_sf(
+      data = watersheds, 
+      aes(fill = {{fill}}),
+      color = "gray90", 
+      linewidth = 0.2
+    ) +
+    scale_fill_viridis(
+      name = name,
+      option = "mako"
+    ) +
+    theme_void() +
+    theme(
+      legend.background = element_rect(fill = "gray95", color = "transparent"),
+      legend.justification = c("left", "bottom"),
+      legend.position = c(0.65, 0.19)
+    )
+  
+}
+
+for_print <- 
+  (make_map(gdd, "GDD (°C)") + make_map(precipitation, "PPT (mm)")) /
+  (make_map(streams, "Streams\n(hours)") + make_map(protected, "Protected"))
+
+bb8 <- st_union(watersheds, utah) |> st_bbox()
+
+dy <- bb8[["ymax"]] - bb8[["ymin"]]
+dx <- bb8[["xmax"]] - bb8[["xmin"]]
+
+ggsave(
+  plot = for_print,
+  filename = here("figures", "covariates.png"),
+  width = 7,
+  height = 7 * (dy/dx),
+  dpi = 300
+)
+
+(make_map(gdd, "GDD (°C)") + 
+  make_map(precipitation, "PPT (mm)") +
+  make_map(streams, "Streams\n(hours)")) /
+  (make_map(springs, "Springs\n(hours)") +
+     make_map(protected, "Protected") +
+     make_map(roads, "Roads\n(hours)"))
+
+```
+
+### Bocinsky 2014 Thresholds
+
+```{r}
+#| fig-width: 8
+#| fig-asp: 0.45
+#| code-fold: true
+#| fig-align: center
+
+thresholds <- tibble(
+  xintercept = c(300, 1000),
+  x = c(320, 1020),
+  y = 72,
+  variable = c("precipitation", "gdd"),
+  label = c("Minimum threshold\n300 mm", "Minimum threshold\n1000°C GDD")
+)
+
+values <- watersheds |>
+  st_drop_geometry() |> 
+  select(precipitation, gdd) |> 
+  pivot_longer(
+    everything(),
+    names_to = "variable"
+  )
+
+pretty_breaks <- function(x) {
+  
+  xmin <- round(min(x), -2)
+  xmax <- round(max(x), -2)
+  
+  seq(xmin, xmax, by = 200)
+  
+}
+
+threshold_dists <- ggplot() +
+  geom_histogram(
+    data = values,
+    aes(value),
+    color = "white",
+    binwidth = 100,
+    center = 50
+  ) +
+  geom_vline(
+    data = thresholds,
+    aes(xintercept = xintercept),
+    linewidth = 1.2,
+    color = "darkred"
+  ) +
+  geom_text(
+    data = thresholds,
+    aes(x, y, label = label),
+    color = "darkred",
+    hjust = 0,
+    vjust = 1
+  ) +
+  facet_wrap(
+    ~variable, 
+    scale = "free_x",
+    labeller = labeller(
+      variable = c(precipitation = "Precipitation (mm)", 
+                   gdd = "Maize GDD (°C)")
+    ),
+    strip.position = "bottom"
+  ) +
+  scale_x_continuous(breaks = pretty_breaks) +
+  labs(
+    x = NULL,
+    y = "Count of watersheds"
+  ) +
+  theme_bw(12) +
+  theme(
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(size = rel(1)),
+    strip.placement = "outside"
+  )
+
+ggsave(
+  plot = threshold_dists,
+  filename = here("figures", "threshold_distributions.png"),
+  width = 7,
+  height = 7 * (dy/(2*dx)),
+  dpi = 300
+)
+
+threshold_dists
+  
+```
+
+Here's what that threshold looks like in geographic space.
+
+```{r}
+
+watersheds <- watersheds |> 
+  mutate(
+    in_niche = ifelse(gdd >= 1000 & precipitation >= 300, "Yes", "No"),
+    in_niche = factor(in_niche)
+  )
+
+```
+
+```{r}
+#| fig-width: 8
+#| fig-asp: 0.45
+#| code-fold: true
+#| fig-align: center
+
+threshold_map <- ggplot() +
+    geom_sf(
+      data = utah,
+      fill = "gray95"
+    ) +
+    geom_sf(
+      data = watersheds, 
+      aes(fill = in_niche),
+      color = "gray90", 
+      linewidth = 0.2
+    ) +
+    scale_fill_viridis(
+      name = "In Niche?",
+      option = "mako",
+      end = 0.75,
+      discrete = TRUE
+    ) +
+    theme_void() +
+    theme(
+      legend.background = element_rect(fill = "gray95", color = "transparent"),
+      legend.justification = c("left", "top"),
+      legend.position = c(0.66, 0.57)
+    )
+
+# ggsave(
+#   plot = (obs + threshold_map),
+#   filename = here("figures", "threshold_map.png"),
+#   width = 7,
+#   height = 7 * (dy/(2*dx)),
+#   dpi = 300
+# )
+
+obs + threshold_map
+
+```
+
+Is there a significant difference in elevation between those in the niche and those outside it?
+
+```{r}
+
+with(watersheds, t.test(elevation ~ in_niche))
+
+```
+
+## Analysis
+
+Here, we go through iterations of model fitting and evaluation, with changes to correct for problems like autocorrelation and concurvity (the smoothed version of co-linearity in the predictors). For each fitted model, we provide a model summary, diagnostic plots, and visualizations of partial effects (sometimes called marginal responses) for each smooth term.
+
+```{r}
+
+fm <- sites ~ 
+  s(precipitation, k=5) +
+  s(gdd, k=5) +
+  s(streams, k=5) +
+  s(protected, k=5) + 
+  offset(log(area))
+
+fremont <- gam(
+  fm, 
+  data = watersheds,
+  family = poisson, 
+  select = TRUE
+)
+
+```
+
+```{r}
+#| out-width: "80%"
+#| fig-align: center
+
+summary(fremont)
+
+appraise(fremont)
+
+draw(fremont, residuals = TRUE)
+
+```
+
+### Dispersion
+
+First, an h-test for scaled dispersion in a poisson model. In a poisson model, the variance is supposed to equal the mean. If this holds, then $\alpha$ in $Var(y) = E(y) + \alpha \cdot E(y)$ should equal zero. A simple, intercept-only linear model can test this idea.
+
+```{r}
+
+# code adopted from AER::dispersiontest()
+
+observed <- model.response(model.frame(fremont))
+estimate <- fitted(fremont)
+
+variance <- ((observed - estimate)^2 - observed)/estimate
+
+dispersion_model <- lm(variance ~ 1)
+
+```
+
+```{r}
+#| code-fold: true
+
+tibble(
+  estimate = as.vector(coefficients(dispersion_model)[1]),
+  statistic = as.vector(summary(dispersion_model)$coef[1, 3]),
+  null = 0,
+  p.value = pnorm(statistic, lower.tail = FALSE)
+) |> 
+  mutate(across(everything(), round, digits = 4)) |> 
+  gt(
+    rowname_col = NULL
+  ) |> 
+  tab_caption(
+    caption = gt::html("<p>t-test for Overdispersion<br>Alternative: &alpha; > 0</p>")
+  ) |> 
+  tab_options(
+    table.align = "left",
+    container.width = pct(35)
+  )
+
+```
+
+Clearly, there is over-dispersion in this model. To correct for this, we re-run the model with a `negative binomial` error distribution, letting the model adjust to $\alpha$. We choose a negative binomial over a quasipoisson as it uses maximum likelihood.
+
+```{r}
+
+fremont <- gam(
+  fm, 
+  data = watersheds,
+  family = nb, 
+  select = TRUE
+)
+
+```
+
+```{r}
+#| out-width: "80%"
+#| fig-align: center
+
+summary(fremont)
+
+appraise(fremont)
+
+draw(fremont, residuals = TRUE)
+
+```
+
+### Residual Spatial Autocorrelation
+
+Monte Carlo simulations of Moran's I to test for spatial autocorrelation in the residuals (using sfdep).
+
+```{r}
+
+neighbors <- st_contiguity(watersheds)
+weights <- st_weights(neighbors)
+
+global_moran_perm(
+  residuals(fremont),
+  neighbors,
+  weights
+)
+
+```
+
+There's significant spatial autocorrelation. To fix this, we will use a generalized additive mixed-model (GAMM) with an exponential spatial correlation structure. This is not strictly correct, as it assumes spatial continuity of points, not polygons, but it's a useful first approximation.
+
+### Spatial Correlation Structure
+
+Add coordinates for watershed centroids to the dataset.
+
+```{r}
+
+xy <- watersheds |> 
+  st_centroid() |> 
+  st_coordinates() |> 
+  as_tibble() |> 
+  rename_with(tolower)
+
+watersheds <- bind_cols(watersheds, xy)
+
+```
+
+```{r}
+
+fremont <- gamm(
+  fm,
+  correlation = corExp(form = ~x+y),
+  data = watersheds,
+  family = nb,
+  verbosePQL = FALSE
+)
+
+```
+
+```{r}
+#| out-width: "80%"
+#| fig-align: center
+
+summary(fremont$lme)
+
+summary(fremont$gam)
+
+appraise(fremont$gam)
+
+draw(fremont$gam)
+
+```
+
+By accounting for spatial autocorrelation, the expected degrees of freedom for gdd and cost-distance to streams are now both 1, which suggests that there are no non-linear effects for those covariates.
+
+### Concurvity
+
+A post-hoc test of non-linear correlations in the predictors.
+
+```{r}
+
+concurvity(fremont$gam)
+
+```
+
+Not good... 
+
+### Final model
+
+Cost-distance to roads is non-significant, so we'll remove that variable from the model entirely.
+
+```{r}
+
+fm <- sites ~ 
+  s(precipitation, k=5) +
+  gdd +
+  streams +
+  protected +
+  offset(log(area))
+
+fremont <- gamm(
+  fm,
+  correlation = corExp(form = ~x+y),
+  data = watersheds,
+  family = nb,
+  verbosePQL = FALSE
+)
+
+```
+
+```{r}
+#| out-width: "80%"
+#| fig-align: center
+
+summary(fremont$lme)
+
+summary(fremont$gam)
+
+appraise(fremont$gam)
+
+draw(parametric_effects(fremont$gam))
+
+draw(fremont$gam)
+
+```
+
+### Final Moran's I
+
+One more Moran's I test to see if we really got a hold of the spatial autocorrelation. We'll do this with the normalized residuals of the lme inside the GAMM as that incorporates the exponential covariance matrix.
+
+```{r}
+
+global_moran_perm(
+  residuals(fremont$lme, type = "normalized"),
+  neighbors,
+  weights
+)
+
+```
+
+Looks good!
+
+### Variance Inflation Factor
+
+There can't be concurvity in the model anymore, as there is only one smoothed term. However, we should now check for potential multi-collinearity in the parameteric terms.
+
+```{r}
+
+# borrowing this code from mgcv.helper
+# https://github.com/samclifford/mgcv.helper/blob/master/R/vif.gam.R
+
+vif <- function(object){
+
+  obj.sum <- mgcv::summary.gam(object)
+
+  # estimate of standard deviation of residuals
+  s2 <- object$sig2 
+  
+  # data used to fit the model
+  X <- object$model 
+  
+  # n observations
+  n <- nrow(X) 
+  
+  # omit the intercept term, it can't inflate variance
+  v <- -1 
+  
+  # variance in estimates
+  varbeta <- obj.sum$p.table[v,2]^2 
+  
+  selected_col <- row.names(obj.sum$p.table)[v]
+  selected_col <- gsub("TRUE", "", selected_col)
+  
+  # variance of all the explanatory variables
+  varXj <- apply(X=X[, selected_col],MARGIN=2, var) 
+  
+  # the variance inflation factor, obtained by rearranging
+  # var(beta_j) = s^2/(n-1) * 1/var(X_j) * VIF_j
+  VIF <- varbeta/(s2/(n-1)*1/varXj) 
+
+  tibble::tibble(
+    variable = names(VIF),
+    vif = VIF
+  )
+
+}
+
+vif(fremont$gam)
+
+```
+
+The VIF for gdd is a little high, but within acceptable limits.
+
+## Results
+
+### Marginal response
+
+Here we estimate the marginal responses (also known as partial effects) for each covariate by letting the target covariate vary and holding the other covariates at their means and predicting the site count (the response). Here we use the {ggeffects} package.
+
+```{r}
+#| code-fold: true
+#| fig-align: center
+#| fig-height: 6
+#| fig.asp: 0.93
+#| out-width: "70%"
+
+margins <- ggpredict(fremont) |>
+  unclass() |>
+  bind_rows() |>
+  filter(group != "area") |>
+  rename(
+    "y" = predicted,
+    "ymin" = conf.low,
+    "ymax" = conf.high,
+    "variable" = group
+  ) |> 
+  mutate(
+    # hacky way to "clip" the ribbon before expanding in ggplot
+    ymax = ifelse(ymax > 100, 100, ymax)
+  )
+
+response_labels <- tibble(
+  variable = c("precipitation", "gdd", "streams", "protected"),
+  label = c("Precipitation\n(mm)", 
+            "Maize GDD\n(°C)", 
+            "Streams\n(hours)", 
+            "Protected\n(Federal Land)"),
+  x = with(watersheds, c(max(precipitation), min(gdd), max(streams), min(protected))),
+  y = max(margins$ymax),
+  hjust = c(0.95,0.05,0.95,0.05)
+)
+
+scale_pretty <- function(x, n = 4L) {
+  
+  brks <- pretty(x, n = n)
+  
+  nbrks <- length(brks)
+  
+  i <- ifelse(
+    nbrks > n,
+    c(1, nbrks),
+    nbrks
+  )
+
+  brks[-i]
+  
+}
+
+marginal_response <- ggplot(margins, aes(x, y)) +
+  geom_ribbon(
+    aes(ymin = ymin, ymax = ymax, fill = variable)
+  ) + 
+  scale_fill_manual(
+    values = c("#4F3824", "#D1603D", "#DDB967", "#848FA5")
+  ) +
+  geom_line(
+    linewidth = 2,
+    color = alpha('white', 0.5),
+    lineend = "round"
+  ) +
+  geom_line(
+    linewidth = 1,
+    lineend = "round"
+  ) +
+  geom_label(
+    data = response_labels,
+    aes(x, y, label = label),
+    size = 4,
+    hjust = response_labels$hjust,
+    vjust = 1,
+    label.size = NA,
+    alpha = 0.5,
+    lineheight = 0.88
+  ) +
+  labs(
+    x = NULL,
+    y = "Number of sites"
+  ) +
+  facet_wrap(
+    ~variable, 
+    scale = "free_x"
+  ) +
+  scale_x_continuous(breaks = scale_pretty) +
+  coord_cartesian(ylim = c(0, 100)) +
+  theme_bw(12) +
+  theme(
+    axis.title.y = element_text(size = 13),
+    legend.position = "none",
+    panel.grid = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_blank()
+  )
+
+ggsave(
+  plot = marginal_response,
+  filename = here("figures", "marginal_response.png"),
+  width = 5,
+  height = 5 * 0.93,
+  dpi = 300
+)
+
+marginal_response
+
+```
+
+### Map
+
+```{r}
+
+watersheds <- watersheds |> 
+  mutate(
+    estimate = fitted(fremont$gam) |> as.vector(),
+    residuals = residuals(fremont$lme, type = "normalized")
+  )
+
+```
+
+```{r}
+#| fig-width: 8
+#| fig-asp: 0.9
+#| code-fold: true
+#| fig-align: center
+
+basemap <- ggplot() +
+  geom_sf(
+    data = utah,
+    fill = "gray95"
+  ) +
+  theme_void() +
+  theme(
+    legend.background = element_rect(fill = "gray95", 
+                                     color = "transparent"),
+    legend.justification = c("left", "bottom"),
+    legend.position = c(0.65, 0.19)
+  )
+
+obs <- basemap +
+  geom_sf(
+    data = watersheds, 
+    aes(fill = (sites/area)/max_density_obs),
+    color = "gray90", 
+    linewidth = 0.1
+  ) +
+  scale_fill_viridis(
+    name = "Observed",
+    option = "mako",
+    limits = c(0, 1)
+  )
+
+max_density_est <- with(watersheds, max(estimate/area))
+
+estimate <- basemap +
+  geom_sf(
+    data = watersheds, 
+    aes(fill = (estimate/area)/max_density_est),
+    color = "gray90", 
+    linewidth = 0.1
+  ) +
+  scale_fill_viridis(
+    name = "Estimated",
+    option = "mako",
+    limits = c(0, 1)
+  )
+
+res <- basemap +
+  geom_sf(
+    data = watersheds, 
+    aes(fill = residuals),
+    color = "gray90", 
+    linewidth = 0.1
+  ) +
+  scale_fill_viridis(
+    name = "Residuals",
+    option = "mako"
+  )
+
+ggsave(
+  plot = (obs + estimate),
+  filename = here("figures", "model-map.png"),
+  width = 7,
+  height = 7 * (dy/(2*dx)),
+  dpi = 300
+)
+
+ggsave(
+  plot = (estimate + threshold_map),
+  filename = here("figures", "threshold_map.png"),
+  width = 7,
+  height = 7 * (dy/(2*dx)),
+  dpi = 300
+)
+
+(obs + estimate) / (res + threshold_map)
+
+```
+
+Please note that the residuals are still being shown for the count-level data.
+
+```{r}
+#| echo: false
+
+# save model 
+saveRDS(fremont, file = here("data", "western-fremont-model.Rds"))
+
+```
+
+## Session Info
+
+```{r}
+#| code-fold: true
+
+# save the session info as an object
+pkg_sesh <- sessioninfo::session_info(pkgs = "attached")
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  quarto::quarto_version(), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+
+```

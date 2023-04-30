@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Rbuildignore
+/.misc/
+/data/*.tif
+/data/*.models.Rds
+/data/*.prediction.Rds
+/data/*_ITRDB.Rds
+/data/western-fremont.gpkg
+/.quarto/
+/manuscript/rambling.txt
+/manuscript/manuscript.gdoc
