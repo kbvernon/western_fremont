@@ -1,5 +1,5 @@
 
-# western-fremont  
+# western_fremont  
 
 <!-- badges: start -->
 
@@ -18,8 +18,8 @@ This repository contains the data and code for our paper:
 > Simon Brewer
 > [![](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0002-6810-1911),
 > and Brian F. Codding
-> [![](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0001-7977-8568),
-> (2023) The Fremont Frontier: Living at the Margins of Maize Farming.
+> [![](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0001-7977-8568)
+> (2023). The Fremont Frontier: Living at the Margins of Maize Farming.
 > *Quaternary International*.
 
 You can view the supplement with the primary R code and analyses here: [/R/analysis.html](/R/analysis.html).
@@ -37,7 +37,7 @@ You can view the supplement with the primary R code and analyses here: [/R/analy
 &emsp;&emsp;&RightTee; 📄 [manuscript.qmd](/manuscript/manuscript.qmd)  
 &emsp;&emsp;&RightTee; 📄 [manuscript.pdf](/manuscript/manuscript.pdf)  
 📂 [R](/R) code for preparing data and conducting analysis, including  
-&emsp;&emsp;&RightTee; 📄 [analysis.qmd](/R/analysis.qmd),  
+&emsp;&emsp;&RightTee; 📄 [analysis.qmd](/R/analysis.qmd) is the primary analysis,  
 &emsp;&emsp;&RightTee; 📄 [cost-distance.R](/R/cost-distance.R),  
 &emsp;&emsp;&RightTee; 📄 [data-wrangling.R](/R/data-wrangling.R),  
 &emsp;&emsp;&RightTee; 📄 [paleocar.R](/R/paleocar.R),  
