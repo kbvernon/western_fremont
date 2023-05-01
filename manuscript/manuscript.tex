@@ -75,9 +75,6 @@
 \def\fps@figure{htbp}
 \makeatother
 
-\usepackage{booktabs}
-\usepackage{caption}
-\usepackage{longtable}
 \makeatletter
 \makeatother
 \makeatletter
@@ -232,7 +229,7 @@ climate changes over time.
     Paleoclimate Reconstruction
 \end{keyword}
 \end{frontmatter}
-    \ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, interior hidden, breakable, sharp corners, enhanced, borderline west={3pt}{0pt}{shadecolor}, frame hidden]}{\end{tcolorbox}}\fi
+    \ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}, enhanced, sharp corners, frame hidden, interior hidden]}{\end{tcolorbox}}\fi
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -762,54 +759,22 @@ Supplement.
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
+\hypertarget{tbl-results}{}
 \begin{table}
-
-\caption{\label{tbl-results}Model
-Results}\begin{minipage}[t]{\linewidth}
-\subcaption{\label{tbl-results-1}Parametric Terms }
-
-{\centering 
-
-\setlength{\LTpost}{0mm}
-\begin{longtable}{lcccc}
-\tabularnewline
-
-\toprule
- & \textbf{exp(Beta)} & \textbf{SE}\textsuperscript{\textit{1}} & \textbf{t} & \textbf{p-value} \\ 
-\midrule
-Intercept & 0.00 & 1.40 & -7.13 & <0.001 \\ 
-Maize GDD & 1.00 & 0.001 & 4.15 & <0.001 \\ 
-CD to Streams & 0.67 & 0.156 & -2.57 & 0.011 \\ 
-Protected & 4.82 & 0.497 & 3.16 & 0.002 \\ 
-\bottomrule
-\end{longtable}
-\begin{minipage}{\linewidth}
-\textsuperscript{\textit{1}}SE = Standard Error\\
-\end{minipage}
-
-}
-
-\end{minipage}%
-\newline
-\begin{minipage}[t]{\linewidth}
-\subcaption{\label{tbl-results-2}Smooth Terms }
-
-{\centering 
-
-\begin{longtable}{lcccc}
-\tabularnewline
-
-\toprule
- & \textbf{edf} & \textbf{ref.df} & \textbf{F} & \textbf{p-value} \\ 
-\midrule
-s(Precipitation) & 3.25 & 3.25 & 11.1 & <0.001 \\ 
-\bottomrule
-\end{longtable}
-
-}
-
-\end{minipage}%
-
+\caption{\label{tbl-results}Model Results }\tabularnewline
+[]
+\centering
+\begin{tabular}{lllll}
+\textbf{Parametric Terms}  & \textbf{exp ($\beta$)}  & \textbf{std.er} & \textbf{t} & \textbf{p-value} \\ \midrule
+Intercept                   & 0.00                      & 1.40             & -7.13       & \textless{}0.001 \\ 
+Maize GDD                   & 1.00                      & 0.001            & ~4.15       & \textless{}0.001 \\ 
+CD to Streams               & 0.67                      & 0.156            & -2.57       & ~~0.011           \\ 
+Protected                   & 4.82                      & 0.497            & ~3.16       & ~~0.002           \\ \bottomrule
+                            &                           &                  &             &                   \\ 
+                            &                           &                  &             &                   \\ 
+\textbf{Smooth Terms}      & \textbf{edf}             & \textbf{ref.df} & \textbf{F} & \textbf{p-value} \\ \midrule
+s(Precipitation)            & 3.25                      & 3.25             & 11.1        & \textless{}0.001 \\ \bottomrule
+\end{tabular}
 \end{table}
 
 As shown in Table~\ref{tbl-results}, all linear (or parametric)

@@ -188,19 +188,33 @@ All analyses are conducted in the R programming language and environment [@rcore
 ```{r}
 #| label: tbl-results
 #| tbl-cap: Model Results
-#| tbl-subcap:
-#|   - "Parametric Terms"
-#|   - "Smooth Terms"
-#| layout-nrow: 2
-#| layout: "[[1], [-1], [1]]"
-#| out-width: 50%
+#| output: asis
 
-# returns parametric and smooth regression tables
-# and q, a list with character strings for reporting estimates in text
+# tables in quarto are still a hot mess
+cat(
+"
+\\begin{table}[]
+\\centering
+\\begin{tabular}{lllll}
+\\textbf{Parametric Terms}  & \\textbf{exp ($\\beta$)}  & \\textbf{std.er} & \\textbf{t} & \\textbf{p-value} \\\\ \\midrule
+Intercept                   & 0.00                      & 1.40             & -7.13       & \\textless{}0.001 \\\\ 
+Maize GDD                   & 1.00                      & 0.001            & ~4.15       & \\textless{}0.001 \\\\ 
+CD to Streams               & 0.67                      & 0.156            & -2.57       & ~~0.011           \\\\ 
+Protected                   & 4.82                      & 0.497            & ~3.16       & ~~0.002           \\\\ \\bottomrule
+                            &                           &                  &             &                   \\\\ 
+                            &                           &                  &             &                   \\\\ 
+\\textbf{Smooth Terms}      & \\textbf{edf}             & \\textbf{ref.df} & \\textbf{F} & \\textbf{p-value} \\\\ \\midrule
+s(Precipitation)            & 3.25                      & 3.25             & 11.1        & \\textless{}0.001 \\\\ \\bottomrule
+\\end{tabular}
+\\end{table}
+"
+)
+
+```
+
+```{r}
+
 here::here("R", "regression-table.R") |> source()
-
-parametric_table
-smooth_table
 
 ```
 

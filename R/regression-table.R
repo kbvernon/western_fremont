@@ -52,21 +52,21 @@ smooth <- tbl_regression(
     ref.df = "**ref.df**"
   )
 
-parametric_table <- parametric |> 
-  as_gt() |> 
-  tab_options(
-    table.width = pct(50),
-    table.font.names = "Times New Roman"
-  ) |> 
-  as_latex()
+# parametric_table <- parametric |>
+#   as_gt() |>
+#   tab_options(
+#     table.width = pct(50),
+#     table.font.names = "Times New Roman"
+#   ) |>
+#   as_latex()
 
-smooth_table <- smooth |> 
-  as_gt() |> 
-  tab_options(
-    table.width = pct(50),
-    table.font.names = "Times New Roman"
-  ) |> 
-  as_latex()
+# smooth_table <- smooth |> 
+#   as_gt() |> 
+#   tab_options(
+#     table.width = pct(50),
+#     table.font.names = "Times New Roman"
+#   ) |> 
+#   as_latex()
 
 p <- parametric |> 
   as_tibble() |> 
