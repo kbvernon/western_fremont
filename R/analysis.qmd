@@ -1,6 +1,6 @@
 ---
 title: "Supplement: Fremont Models"
-date: "`r Sys.Date()`"
+date: today
 format:
   html: 
     embed-resources: true
@@ -35,7 +35,6 @@ execute:
 
 library(GGally)
 library(ggeffects)
-library(gratia)
 library(gt)
 library(here)
 library(mgcv)
@@ -240,10 +239,10 @@ dx <- bb8[["xmax"]] - bb8[["xmin"]]
 
 ggsave(
   plot = for_print,
-  filename = here("figures", "covariates.png"),
-  width = 7,
-  height = 7 * (dy/dx),
-  dpi = 300
+  filename = here("figures", "covariates.jpg"),
+  width = 5.75,
+  height = 5.75 * (dy/dx),
+  dpi = 600
 )
 
 (make_map(gdd, "GDD (°C)") + 
@@ -335,10 +334,10 @@ threshold_dists <- ggplot() +
 
 ggsave(
   plot = threshold_dists,
-  filename = here("figures", "threshold_distributions.png"),
-  width = 7,
-  height = 7 * (dy/(2*dx)),
-  dpi = 300
+  filename = here("figures", "threshold_distributions.jpg"),
+  width = 5.75,
+  height = 5.75 * (dy/(2*dx)),
+  dpi = 600
 )
 
 threshold_dists
@@ -387,14 +386,6 @@ threshold_map <- ggplot() +
       legend.position = c(0.66, 0.57)
     )
 
-# ggsave(
-#   plot = (obs + threshold_map),
-#   filename = here("figures", "threshold_map.png"),
-#   width = 7,
-#   height = 7 * (dy/(2*dx)),
-#   dpi = 300
-# )
-
 obs + threshold_map
 
 ```
@@ -427,17 +418,7 @@ fremont <- gam(
   select = TRUE
 )
 
-```
-
-```{r}
-#| out-width: "80%"
-#| fig-align: center
-
 summary(fremont)
-
-appraise(fremont)
-
-draw(fremont, residuals = TRUE)
 
 ```
 
@@ -492,17 +473,7 @@ fremont <- gam(
   select = TRUE
 )
 
-```
-
-```{r}
-#| out-width: "80%"
-#| fig-align: center
-
 summary(fremont)
-
-appraise(fremont)
-
-draw(fremont, residuals = TRUE)
 
 ```
 
@@ -551,19 +522,9 @@ fremont <- gamm(
   verbosePQL = FALSE
 )
 
-```
-
-```{r}
-#| out-width: "80%"
-#| fig-align: center
-
 summary(fremont$lme)
 
 summary(fremont$gam)
-
-appraise(fremont$gam)
-
-draw(fremont$gam)
 
 ```
 
@@ -602,21 +563,9 @@ fremont <- gamm(
   verbosePQL = FALSE
 )
 
-```
-
-```{r}
-#| out-width: "80%"
-#| fig-align: center
-
 summary(fremont$lme)
 
 summary(fremont$gam)
-
-appraise(fremont$gam)
-
-draw(parametric_effects(fremont$gam))
-
-draw(fremont$gam)
 
 ```
 
@@ -703,6 +652,7 @@ Here we estimate the marginal responses (also known as partial effects) for each
 margins <- ggpredict(fremont) |>
   unclass() |>
   bind_rows() |>
+  as_tibble() |> # the "ggeffects" class doesn't want to let go
   filter(group != "area") |>
   rename(
     "y" = predicted,
@@ -751,7 +701,7 @@ marginal_response <- ggplot(margins, aes(x, y)) +
   ) +
   geom_line(
     linewidth = 2,
-    color = alpha('white', 0.5),
+    color = alpha('white', 0.75),
     lineend = "round"
   ) +
   geom_line(
@@ -789,10 +739,10 @@ marginal_response <- ggplot(margins, aes(x, y)) +
 
 ggsave(
   plot = marginal_response,
-  filename = here("figures", "marginal_response.png"),
+  filename = here("figures", "marginal_response.jpg"),
   width = 5,
   height = 5 * 0.93,
-  dpi = 300
+  dpi = 600
 )
 
 marginal_response
@@ -872,18 +822,18 @@ res <- basemap +
 
 ggsave(
   plot = (obs + estimate),
-  filename = here("figures", "model-map.png"),
-  width = 7,
-  height = 7 * (dy/(2*dx)),
-  dpi = 300
+  filename = here("figures", "model-map.jpg"),
+  width = 5.75,
+  height = 5.75 * (dy/(2*dx)),
+  dpi = 600
 )
 
 ggsave(
   plot = (estimate + threshold_map),
-  filename = here("figures", "threshold_map.png"),
-  width = 7,
-  height = 7 * (dy/(2*dx)),
-  dpi = 300
+  filename = here("figures", "threshold_map.jpg"),
+  width = 5.75,
+  height = 5.75 * (dy/(2*dx)),
+  dpi = 600
 )
 
 (obs + estimate) / (res + threshold_map)

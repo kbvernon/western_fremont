@@ -133,3 +133,10 @@ ggsave(
   height = 3,
   dpi = 300
 )
+
+ggsave(
+  here("figures", "elevation-everything.jpg"),
+  width = 4,
+  height = 3,
+  dpi = 600
+)

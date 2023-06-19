@@ -64,13 +64,10 @@ keywords:
   - Great Basin
   - Paleoclimate Reconstruction
 bibliography: bibliography.bib
-format:
-  elsevier-pdf:
-    keep-tex: true
-    journal:
-      name: Quaternary International
-      formatting: preprint
-      model: 3p
+linenumbers: false
+watermark: false
+format: 
+  simple-pdf: default
 execute: 
   echo: false
   error: false
@@ -87,7 +84,7 @@ Assuming that western Fremont individuals were adept at responding to variation 
 
 ![
 On the left is an overview map showing the project area with modern satellite imagery. Dark green colors represent high elevation, high precipitation areas. The large beige area in the northwest is the Bonneville Basin. What remains of the Great Salt Lake can be seen just west of Salt Lake City. For visualization purposes, the map on the right shows the relative density of archaeological sites (see the section on site data below for details on how we calculate relative density). Please note that although the map appears to show many empty watersheds, most do in fact contain archaeological sites, just at extremely low densities.
-](../figures/overview.png){#fig-overview fig-align="center" width="6in"}
+](../figures/overview.jpg){#fig-overview fig-align="center" width="6in"}
 
 # Background
 
@@ -99,7 +96,7 @@ Around this time, the Fremont likely reached their greatest geographic extent, i
 
 ![
 Linear responses of average water-year precipitation (mm), average growing-season maize gdd (C), and cost-distance to streams (hours) to changes in elevation (m). See methods for how these values were calculated and results for more details.
-](../figures/elevation-everything.png){#fig-elevation fig-align="center" width="4in"}
+](../figures/elevation-everything.jpg){#fig-elevation fig-align="center" width="4in"}
 
 A basin and range topography dominates the landscape of the Great Basin, with large, dry valleys and endorheic basins punctuated by north-south trending mountain ranges. Changes in elevation in this setting are quite dramatic, on the order of several thousand meters over a short east-west transect. As elevation drives virtually every climatological process in the region, the local ecology is characterized by equally dramatic extremes [@billings1951; @grayson2011]. As shown in @fig-elevation, net water-year precipitation in the eastern Great Basin tends to increase with elevation, while maize growing degree days (GDD) over the growing-season tends to decrease. An important trade-off thus exists between temperature and precipitation, with warmer and drier conditions at lower elevations and cooler and wetter conditions at higher elevations.
 
@@ -125,7 +122,7 @@ This is known as the Ideal Free Distribution (IFD) model [@fretwell1969]. The IF
 
 Two circumstances provide important exceptions to this simple model. The first concerns economies of scale, or situations in which $S_i$ exhibits positive density dependence. In ecology, these are known as Allee effects, and they are assumed to occur at low density [@allee1949; @fretwell1969]. The second concerns additional settlement costs, or costs associated with moving from one habitat to another. This is a violation of the free element of the IFD. When it occurs, the result is an ideal despotic distribution (IDD) [@fretwell1969]. This has the consequence of reducing the total population in the more suitable habitat at equilibrium.
 
-Many social and ecological variables may be relevant to defining a general measure of $S_i$, but here we are focusing on ecological determinants of intrinsic habitat quality, $Q_i$, that are specific to maize farmers. Our reasoning here is fairly straightforward. If we assume that the distribution of Fremont populations across habitats is at equilibrium, then we can combine this concept of maize-specific suitability with the input matching rule to reconstruct the ranking of habitats on the basis of ecologically-relevant parameters. That is, it follows from their being at equilibrium that any observed differences in population size must be the result of differences in $Q_i$, that $Q_i \approx f(N_i)$ at equilibrium. So, if we have some proxy for $N_i$, like the distribution of Fremont sites across habitats, we can model that value as a function of ecological covariates $X_i$, then use the resulting model to reconstruct $Q_i \approx f(X_i)$, giving us the maize niche for Fremont farmers, both in geographic and ecological space.  
+Many social and ecological variables may be relevant to defining a general measure of $S_i$, but here we are focusing on ecological determinants of intrinsic habitat quality, $Q_i$, that are specific to maize farmers. Our reasoning here is fairly straightforward. If we assume that the distribution of Fremont populations across habitats is at equilibrium, then we can combine this concept of maize-specific suitability with the input matching rule to reconstruct the ranking of habitats on the basis of ecologically-relevant parameters. In other words, it follows from their being at equilibrium that any observed differences in population size, $N_i$, must be the result of differences in $Q_i$. So, if we have some proxy for $N_i$, like the distribution of Fremont sites across habitats, we can model that value as a function of ecological covariates, $X_i$, then use the resulting model to reconstruct $Q_i \sim f(X_i)$, giving us the maize niche for Fremont farmers, both in geographic and ecological space.  
 
 # Materials and Methods
 
@@ -147,7 +144,7 @@ To identify Fremont sites in the project area, we rely on site records and cultu
 
 These site data include everything from small ceramic scatters to massive Fremont villages like Five Finger Ridge [@janetski1998; @janetski2000]. For this analysis, we assume that these reflect different levels of population size and settlement intensity. All else being equal, scatters should follow from shorter stays by fewer people, villages from longer stays by more people. This is important because population size correlates with a habitat's total suitability according to the IFD model, and our attempts to reconstruct the ecological and geographic borders of the Fremont rely heavily on the input-matching rule, or the idea that habitats with greater intrinsic quality will have larger populations at equilibrium. We, therefore, weight the count of sites in each watershed by the total number of residential features that they contain (+1 for sites with no features). So, a site with no residential features counts as one site, a site consisting of, say, four pithouses counts as four unique sites, and a site containing a roomblock with seven rooms counts as seven sites. This brings the total weighted site count to 2,447, with minimum and maximum values of 0 and 119, respectively.
 
-@fig-overview shows the relative density of Fremont sites across watersheds. The *relative* density refers to the density of feature-weighted sites ($D_i = N_i/area_i$) divided by the maximum density ($max\;D$) across all watersheds, thus scaling the density estimates to the unit interval [0,1]. Using the relative density is just a way of avoiding any implication that we have an independent estimate of the absolute number of Fremont sites in the area, and not just an estimate based on a thinned sample.
+@fig-overview shows the relative density of Fremont sites across watersheds. The *relative* density refers to the density of feature-weighted sites ($D_i = N_i/area_i$) divided by the maximum density ($max\;D$) across all watersheds, thus scaling the density estimates to the unit interval [0,1]. Using the relative density is just a visual tool to help avoid any implication that we have an independent estimate of the absolute number of Fremont sites in the area, and not just an estimate based on a thinned sample.
 
 ## Environmental Covariates
 
@@ -157,7 +154,7 @@ Climate covariates include net water-year precipitation (precipitation, in milli
 
 ![
 Distribution of covariates across watersheds. These include maize growing degree days (GDD), annual precipitation (precipitation), and cost-distance to streams (Streams).
-](../figures/covariates.png){#fig-covariates fig-align="center" width="6in"}
+](../figures/covariates.jpg){#fig-covariates fig-align="center" width="6in"}
 
 We hindcast these climate covariates for each watershed and year over the Fremont sequence from 1550 to 550 years BP (400 to 1400 CE) using the Correlation Adjusted corRelation (CAR) method implemented in the R package paleocar [@bocinsky2019]. This method, in effect, regresses modern climate data against the width of younger tree rings, then uses older rings to predict past climate trends [for further details, see @bocinsky2014; @bocinsky2016]. In this case, we use interpolated precipitation and temperature estimates from the \~800 m resolution PRISM dataset [@prismclimategroup2014] and all tree-ring samples in North America, which were obtained from the International Tree Ring Database using FedData. For each watershed, we took the median values of precipitation and GDD over the Fremont sequence.
 
@@ -168,7 +165,6 @@ Given that our primary covariates all correlate with elevation (reported below),
 ## Statistical Modeling and Model Evaluation
 
 The response variable is a count $N$ of sites per watershed $i$, so it should arise as the result of a Poisson process. Given the trade-offs outlined above, we also expect it to exhibit a non-linear response to precipitation, GDD, and cost-distance to streams, so we fit a generalized additive model (GAM) with a log-link to the data using the R package mgcv [@wood2004]. Although we expect the outcome to be Poisson distributed, we use a negative binomial distribution here, as this includes a parameter, $r$, that can account for potential dispersion without giving up the inferential benefits of maximum likelihood.
-
 $$
 \begin{aligned}
 N_i \sim& \;NB\,(\lambda, r)\\
@@ -224,17 +220,19 @@ A concurvity test on the final model was not conducted as there was only one smo
 
 ![
 Marginal response plots. Each plot shows the response of site counts to changes in a target covariate while holding all other variables at their mean.
-](../figures/marginal_response.png){#fig-responses fig-align="center" width="5in"}
+](../figures/marginal_response.jpg){#fig-responses fig-align="center" width="5in"}
 
 # Discussion
 
-Our results indicate that Fremont maize farmers generally preferred warmer watersheds with longer growing seasons, moderate levels of precipitation (in the range of 400-600 mm), and greater access to perennial streams, as shown by the marginal response plots in Fig. 3. While site counts exhibit a positive linear response to maize GDD, for maize has an upper threshold temperature at which point it no longer grows. Plus, increased temperatures trade-off with water availability, with warmer conditions being better for plant growth but at the same time increasing water demand on the plant to keep up with growth [@ramankutty2002]. The linear relationship between site counts and maize GDD is, thus, relative to the observed distribution of that variable within the study area and should not be used to generalize to a larger geographic extent.
+Our results indicate that Fremont maize farmers generally preferred warmer watersheds with longer growing seasons, moderate levels of precipitation (in the range of 400-600 mm), and greater access to perennial streams, as shown by the marginal response plots in Fig. 3. While site counts exhibit a positive linear response to maize GDD in our model, this should not be expected to continue indefinitely for the obvious reason that maize has an upper threshold temperature at which point it no longer grows. Plus, increased temperatures trade-off with water availability, with warmer conditions being better for plant growth but at the same time increasing water demand on the plant to keep up with growth [@ramankutty2002]. The linear relationship between site counts and maize GDD is, thus, relative to the observed distribution of that variable within the study area and should not be used to generalize outside of that distribution.
 
 Another curious result of our analysis is that site counts do not increase linearly as a function of precipitation, but instead decline after 500 mm. We believe this is likely an artifact of trade-offs related to elevation, specifically the trade-off between precipitation and temperature. We discuss this more below, along with other important implications our results have for the regional prehistory of the eastern Great Basin, particularly for the spread and eventual collapse of maize agriculture.
 
 ## A Goldilocks Zone?
 
-Provided that the trade-off between precipitation and temperature is driven largely by elevation in this region, it would seem likely that the western Fremont chose site locations at elevations that maximized agricultural suitability, as evidenced by the estimated distribution of sites across watersheds (see Fig. 4), though we caution that watersheds are coarse grained units of analysis. Given the topography of the study area, this trade-off would also suggest that areas suitable for maize agriculture take the form of a thin band around the lower slopes of mountain ranges (or lower canyons in the Uintas). Such a band would be akin to a Goldilocks zone for maize agriculture (Yaworsky et al, this issue), a place where the optima for GDD and precipitation overlap, though we should not make too much of this idea, for it is an area of overlap for continuous ecological gradients, not a region demarcated by anything like a perfect line. It also must be emphasized that what matters most for maize agriculture is not necessarily where precipitation falls, but where it accumulates once it enters the streamflow network. Of course, that will largely be a function of elevation in this region, or changes in elevation, so it will still be in proximity to the Goldilocks zone, though perhaps not perfectly coincident with it. At any rate, given these considerations, it would perhaps be more accurate to characterize the trade-off confronting the Fremont as one between what we might call water availability (including general precipitation across the streamflow network, water runoff, proximity to perennial surficial sources, and irrigation potential, among other things) and temperature (including, but not limited to, the length of the growing season and the number of frost-free days).
+Provided that the trade-off between precipitation and temperature is driven largely by elevation in this region, it would seem likely that the western Fremont chose site locations at elevations that maximized agricultural suitability, as evidenced by the estimated distribution of sites across watersheds (see Fig. 4), though we caution that watersheds are coarse grained units of analysis. Given the topography of the study area, this trade-off would also suggest that areas suitable for maize agriculture take the form of a thin band around the lower slopes of mountain ranges (or lower canyons in the Uintas). Such a band would be akin to a Goldilocks zone for maize agriculture (Yaworsky et al, in press), a place where the optima for GDD and precipitation overlap.
+
+We should take care not to over-interpret this idea, however, for it is an area of overlap for continuous ecological gradients, not a region demarcated by anything like a perfect line. It should also be emphasized that what matters most for maize agriculture is not necessarily where precipitation falls, but where it accumulates once it enters the stream flow network. Of course, that will largely be a function of elevation in this region, or changes in elevation, so it will still be in proximity to the Goldilocks zone, though perhaps not perfectly coincident with it. At any rate, given these considerations, it would perhaps be more accurate to characterize the trade-off confronting the Fremont as one between what we might call water availability (including general precipitation across the stream flow network, water runoff, proximity to perennial surficial sources, and irrigation potential, among other things) and temperature (including, but not limited to, the length of the growing season and the number of frost-free days).
 
 ## Irrigation and the Maize Farming Niche
 
@@ -242,11 +240,11 @@ Based on previous research [@benson2011; @adams2006; @bellorado2010], Bocinsky a
 
 ![
 The map on the left shows the relative density of feature-weighted site counts as estimated by the model, with lighter colors representing larger relative densities, darker colors representing smaller relative densities. The map on the right shows which watersheds are in the rain-fed maize farming niche for at least half of the Fremont sequence. The light green color indicates those that are in the niche.
-](../figures/threshold_map.png){#fig-thresholds fig-align="center" width="6in"}
+](../figures/threshold_map.jpg){#fig-thresholds fig-align="center" width="6in"}
 
 It appears that these models tend to agree on the best watersheds for maize farming, though there are some notable exceptions. The western slopes of the Stansbury Range in the north central part of the study area and parts of the Parowan Valley and surrounding areas in the southeast part of the study area are estimated by our model to have non-negligible relative densities, but they fall outside of the niche. Other areas, like much of the Salt Lake valley appear to be in the niche, but are estimated by our model to have relatively low densities. These discrepancies are at least partially explained by limitations of our methodology. For one thing, including the proportion of federal land as a covariate is a very crude way of accounting for sampling bias, so our model might not be picking up on the fact that the Salt Lake valley was actually a highly suitable area for maize agriculture, as evidence to that effect has largely been destroyed. The discrepancy may also be explained by the fact that we have aggregated to the watershed level, thus obscuring important environmental variation across both the landscape in general and site locations in particular. Were we to build a model of the disaggregated data, we would likely find that many agricultural sites do, in fact, fall in the rain-fed maize agricultural niche, even if the watersheds that contain them do not.
 
-But setting aside those methodological issues, some much more interesting explanations may be offered, at least from the perspective of theory. In particular, the spatial covariance structure in our model may be picking up on the structure of the streamflow network, specifically the accumulation of water run-off as a function of slope. This would suggest that if there are more people in one watershed, there should be more more people in the downstream watershed, too, at least relative to other watersheds with similar precipitation and GDD values. In the language of the IFD model, the suitability of the watershed habitat should propagate through the streamflow network. Exploring that intuition in a more systematic way, however, would require much more careful consideration of streamflow. Unfortunately, that is well beyond the scope of the current paper.
+But setting aside those methodological issues, some much more interesting explanations may be offered, at least from the perspective of theory. In particular, the spatial covariance structure in our model may be picking up on the structure of the stream flow network, specifically the accumulation of water run-off as a function of slope. This would suggest that if there are more people in one watershed, there should be more more people in the downstream watershed, too, at least relative to other watersheds with similar precipitation and GDD values. In the language of the IFD model, the suitability of the watershed habitat should propagate through the stream flow network. Exploring that intuition in a more systematic way, however, would require much more careful consideration of stream flow. Unfortunately, that is well beyond the scope of the current paper.
 
 Still, the distribution of the rain-fed niche may offer additional insights. Consider the fact that of the 183 watersheds in the study area, 87% (n=159) have median GDD values greater than 1000°C, but only 54% (n=98) have median precipitation values above 300 mm, and a scant 40% (n=74) meet both requirements. This would suggest that precipitation is the primary limiting factor when it comes to the choice of watersheds in which to dry farm, for there are many more watersheds that meet the minimum GDD requirements than meet the minimum precipitation requirements. One important implication of this is that dry farming would have been very nearly impossible across most of the study area over the Fremont sequence and irrigation more or less necessary. We note that even within the niche, which we have defined somewhat liberally as those watersheds that are included for at least half the Fremont sequence, irrigation would almost certainly have been a necessity [@boomgarden2019; @matson1990; @spangler2010]. Of course, the type and intensity of irrigation would probably differ between sites, with more intensive irrigation occurring where there is less precipitation and less intensive irrigation where there is more precipitation, whether that precipitation falls in the watersheds themselves or in the upstream watersheds that feed into them.
 
@@ -260,7 +258,7 @@ This need not be a wholesale movement or adoption of agricultural practices, eit
 
 ![
 Geographic distribution of Fremont sites across watersheds. The left panel shows the relative density derived from observed site counts, and the right panel shows the relative density from the estimated site counts.
-](../figures/model-map.png){#fig-model-map fig-align="center" width="6in"}
+](../figures/model-map.jpg){#fig-model-map fig-align="center" width="6in"}
 
 ## The Collapse of Maize Agriculture
 

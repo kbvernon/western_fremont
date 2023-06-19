@@ -22,7 +22,9 @@ This repository contains the data and code for our paper:
 > (2023). The Fremont Frontier: Living at the Margins of Maize Farming.
 > *Quaternary International*.
 
-You can view the supplement with the primary R code and analyses here: [/R/analysis.html](/R/analysis.html).
+**Preprint**: [manuscript.pdf](/manuscript/manuscript.pdf)  
+
+**Supplement**: [/R/analysis.html](/R/analysis.html)  
 
 ## Contents  
 

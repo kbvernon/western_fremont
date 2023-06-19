@@ -200,7 +200,7 @@ site_density <- ggplot() +
   theme(
     legend.background = element_rect(fill = "gray95", color = "transparent"),
     legend.justification = c("left", "bottom"),
-    legend.position = c(0.65, 0.19)
+    legend.position = c(0.62, 0.17)
   )
 
 # Save --------------------------------------------------------------------
@@ -217,8 +217,8 @@ everything <- bob + site_density
 
 ggsave(
   plot = everything,
-  filename = here("figures", "overview.png"),
-  width = 7,
-  height = 7 * (dy/(2*dx)),
-  dpi = 300
+  filename = here("figures", "overview.jpg"),
+  width = 5.75,
+  height = 5.75 * (dy/(2*dx)),
+  dpi = 600
 )
