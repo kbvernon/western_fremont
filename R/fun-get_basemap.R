@@ -1,10 +1,9 @@
 
-get_basemap <- function(x,
-                        map = "physical",
-                        size = c(16000,9000),
-                        dpi = 900,
-                        imageSR = 4326,
-                        native = FALSE){
+get_basemap <- function(x, 
+                        map = "physical", 
+                        size = c(16000,9000), 
+                        dpi = 300,
+                        imageSR = 4326) {
 
   x <- st_bbox(x)
 
@@ -22,48 +21,28 @@ get_basemap <- function(x,
 
   }
 
-  base_url <- "http://services.arcgisonline.com/arcgis/rest/services/"
-
-  map_name <- switch(
-    map,
-    "hillshade"= "Elevation/World_Hillshade",
-    "dark"     = "Elevation/World_Hillshade_Dark",
-    "natgeo"   = "NatGeo_World_Map",
-    "usa"      = "USA_Topo_Maps",
-    "imagery"  = "World_Imagery",
-    "physical" = "World_Physical_Map",
-    "shaded"   = "World_Shaded_Relief",
-    "street"   = "World_Street_Map",
-    "terrain"  = "World_Terrain_Base",
-    "topo"     = "World_Topo_map",
-    stop(paste0("The ", map, " map is not supported."), call. = FALSE)
-  )
-
-  map_service <- paste0(base_url, map_name, "/MapServer/export?")
-
-  query <- list(
-    bbox    = paste(x, collapse = ","),
-    bboxSR  = st_crs(x)$epsg,
+  req <- httr2::request("http://services.arcgisonline.com/arcgis/rest/services")
+  
+  req <- httr2::req_url_path_append(req, map, "MapServer", "export")
+  
+  req <- httr2::req_url_query(
+    req,
+    bbox = paste(x, collapse = ","),
+    bboxSR = st_crs(x)$epsg,
     imageSR = imageSR,
-    f       = "image",
-    format  = "png",
-    size    = paste(size, collapse = ","),
-    dpi     = dpi
+    format = "png",
+    dpi = dpi,
+    size = paste(size, collapse = ","),
+    pixelType = "U8",
+    noDataInterpretation = "esriNoDataMatchAny",
+    interpolation = "+RSP_BilinearInterpolation",
+    f = "image"
   )
-
-  request <- httr::GET(
-    map_service,
-    query = query
-  )
-
-  result <- httr::content(request)
-
-  if (native) {
-
-    result <- grDevices::as.raster(result, native = TRUE)
-
-  }
-
-  return(result)
-
+  
+  path <- tempfile(fileext = ".png")
+  
+  resp <- httr2::req_perform(req, path = path)
+  
+  png::readPNG(path, native = TRUE)
+  
 }

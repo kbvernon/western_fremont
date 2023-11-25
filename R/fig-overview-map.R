@@ -17,6 +17,7 @@
 library(ggfx)
 library(ggspatial)
 library(here)
+library(magick)
 library(patchwork)
 library(sf)
 library(tidyverse)
@@ -30,6 +31,11 @@ gpkg <- here("data", "western-fremont.gpkg")
 sys.source(
   here("R", "fun-get_basemap.R"),
   envir = attach(NULL, name = "basemap")
+)
+
+sys.source(
+  here("R", "fun-prepare-image.R"),
+  envir = attach(NULL, name = "image")
 )
 
 # features ----------------------------------------------------------------
@@ -48,12 +54,15 @@ utah <- states |> filter(name == "Utah")
 
 window <- read_sf(gpkg, "window")
 
-roads <- read_sf(gpkg, "roads")
+roads <- read_sf(gpkg, "roads") |> 
+  filter(rttyp %in% c("U", "I")) |> 
+  st_intersection(st_union(utah, window))
 
-roads <- st_intersection(
-  roads, 
-  st_union(utah, window)
-)
+towns <- tigris::places("Utah") |> 
+  rename_with(tolower) |> 
+  select(name) |> 
+  filter(name %in% c("Salt Lake City", "Cedar City", "Delta", "Richfield")) |> 
+  arrange(name)
 
 watersheds <- read_sf(gpkg, "watersheds")
 
@@ -66,8 +75,9 @@ dx <- bb8[["xmax"]] - bb8[["xmin"]]
 
 basemap <- get_basemap(
   bb8, 
-  map = "imagery",
-  size = c(9000, 9000*(dy/dx)),
+  map = "World_Imagery",
+  size = c(6000, 6000*(dy/dx)),
+  dpi = 600,
   imageSR = 26912
 )
 
@@ -87,6 +97,22 @@ bob <- ggplot() +
       basemap,
       bb8[["xmin"]], bb8[["xmax"]],
       bb8[["ymin"]], bb8[["ymax"]]
+    ),
+    mask = ch_alpha("utah-mask")
+  ) +
+  with_mask(
+    geom_sf(
+      data = roads |> filter(rttyp == "I"),
+      color = "#f7782f",
+      linewidth = 0.4
+    ),
+    mask = ch_alpha("utah-mask")
+  ) +
+  with_mask(
+    geom_sf(
+      data = roads |> filter(rttyp == "U"),
+      color = "#f7782f",
+      linewidth = 0.2
     ),
     mask = ch_alpha("utah-mask")
   ) +
@@ -110,11 +136,50 @@ bob <- ggplot() +
     ),
     mask = ch_alpha("window-mask")
   ) +
+  with_mask(
+    geom_sf(
+      data = roads |> filter(rttyp == "I"),
+      color = "#f7782f",
+      linewidth = 0.4
+    ),
+    mask = ch_alpha("window-mask")
+  ) +
+  with_mask(
+    geom_sf(
+      data = roads |> filter(rttyp == "U"),
+      color = "#f7782f",
+      linewidth = 0.2
+    ),
+    mask = ch_alpha("window-mask")
+  ) +
   geom_sf(
     data = window, 
     fill = "transparent", 
     color = "#4E2B04",
     linewidth = 0.2
+  ) +
+  geom_sf(
+    data = towns |> st_centroid(),
+    fill = "white",
+    color = "gray35",
+    shape = 21,
+    size = 2
+  ) +
+  with_outer_glow(
+    geom_sf_text(
+      data = towns,
+      aes(label = name),
+      hjust = c(0,1,0,1),
+      vjust = c(0.5,0,1,0),
+      nudge_x = c(8, -7, 7, -7) * 1000,
+      nudge_y = c(0, 8, -9, 9) * 1000,
+      size = 8/.pt,
+      color = "black",
+      fontface = "bold"
+    ),
+    colour = "white",
+    expand = 5,
+    sigma = 1
   ) +
   annotation_scale(
     aes(location = "bl"),
@@ -128,8 +193,7 @@ bob <- ggplot() +
     pad_y = unit(0.7, "cm"),
     width = unit(0.55, "cm"),
     height = unit(1, "cm")
-  ) +
-  theme_void()
+  )
 
 # inset map ---------------------------------------------------------------
 
@@ -141,8 +205,7 @@ st_geometry(flerp) <- (st_geometry(states)-wst_cntr) * 0.085 + wst_cntr + c(3400
 
 st_crs(flerp) <- 26912
 
-state_labels <- 
-  flerp |> 
+state_labels <- flerp |> 
   st_centroid() |> 
   st_coordinates() |> 
   as_tibble() |> 
@@ -178,8 +241,6 @@ bob <- bob +
 
 # site density ------------------------------------------------------------
 
-max_density_obs <- with(watersheds, max(sites/area))
-
 site_density <- ggplot() +
   geom_sf(
     data = utah,
@@ -187,14 +248,30 @@ site_density <- ggplot() +
   ) +
   geom_sf(
     data = watersheds, 
-    aes(fill = (sites/area)/max_density_obs),
+    aes(fill = ifelse(sites == 0, log(0.00001), log(sites/area))),
     color = "gray90", 
     linewidth = 0.1
   ) +
   scale_fill_viridis(
-    name = "Relative\nSite Density",
-    option = "mako",
-    limits = c(0, 1)
+    name = "Log of\nSite Density",
+    option = "mako"
+  ) +
+  geom_sf(
+    data = roads |> filter(rttyp == "I") |> st_intersection(window),
+    color = "white",
+    linewidth = 0.4
+  ) +
+  geom_sf(
+    data = roads |> filter(rttyp == "U") |> st_intersection(window),
+    color = "white",
+    linewidth = 0.2
+  ) +
+  geom_sf(
+    data = towns |> st_centroid(),
+    fill = "white",
+    color = "gray35",
+    shape = 21,
+    size = 1.5
   ) +
   theme_void() +
   theme(
@@ -209,16 +286,20 @@ everything <- bob + site_density
 
 # ggview::ggview(
 #   everything,
-#   device = "png",
-#   width = 7,
-#   height = 7 * (dy/(2*dx)),
-#   dpi = 300
+#   device = "jpeg",
+#   width = 5.75,
+#   height = 5.75 * (dy/(2*dx)),
+#   dpi = 600
 # )
+
+fn <- here("figures", "overview.jpg")
 
 ggsave(
   plot = everything,
-  filename = here("figures", "overview.jpg"),
+  filename = fn,
   width = 5.75,
   height = 5.75 * (dy/(2*dx)),
   dpi = 600
 )
+
+prepare_image(fn)
