@@ -7,7 +7,7 @@
 % ----------------------- 
 
 % Indent size
-\setlength{\parindent}{1em}
+\setlength{\parindent}{2em}
 \setlength{\leftmargin}{0.5in}
 
 % Fix widows and orphans
@@ -39,6 +39,12 @@
     after=\vspace*{-\baselineskip}
   }
 }
+
+% Line spacing
+\usepackage{setspace}
+% $if(linestretch)$
+\setstretch{1.75}
+% $endif$
 
 % ----------------------- 
 % Section headings
@@ -77,7 +83,7 @@
 % ----------------------- 
 
 \usepackage[
-  width = \textwidth,
+  width = 1.0\textwidth,
   font=small,
   labelsep=period
 ]{caption}
