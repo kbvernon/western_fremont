@@ -4,9 +4,6 @@ date: today
 format:
   html: 
     embed-resources: true
-    fig-align: center
-    fig-dpi: 300
-    fig-responsive: true
     number-sections: true
     number-depth: 3
     toc: true
@@ -21,13 +18,25 @@ execute:
   error: false
 ---
 
+```{css}
+/*| echo: false */
+figcaption {
+    display: none !important;
+}
+```
+
+
 ## Overview
 
 **Goal**: model the distribution of Fremont sites across watersheds.
 
-**Data**: (i) site counts per watershed based on records from the State Historic Preservation Offices of Utah and Nevada and (ii) environmental data from the Oregon State University PRISM Group, as well as the USGS.
+**Data**: (i) site counts per watershed based on records from the State Historic
+Preservation Offices of Utah and Nevada and (ii) environmental data from the
+Oregon State University PRISM Group, as well as the USGS.
 
-**Method**: a GAMM with a negative binomial distribution for count data with dispersion, an an offset to account for the area of each watershed, and an exponential covariance matrix to account for residual spatial autocorrelation.
+**Method**: a GAMM with a negative binomial distribution for count data with
+dispersion, an offset to account for the area of each watershed, and an
+exponential covariance matrix to account for residual spatial autocorrelation.
 
 ## R Preamble
 
@@ -42,93 +51,98 @@ library(patchwork)
 library(sf)
 library(sfdep)
 library(tidyverse)
+library(tigris)
 library(viridis)
+
+```
+
+Some plotting defaults
+
+```{r}
+#| code-fold: true
+#| file: "fun-prepare-image.R"
 
 ```
 
 ## Data
 
-Unit of analysis: watersheds  
+Unit of analysis: watersheds
 
-Dependent variable:  
-- a count of **sites** per watershed  
+Dependent variable:\
+- a count of **sites** per watershed
 
-Independent variables:  
-- **elevation**  
-- maize growing degree days (**gdd**, in Celsius)  
-- **precipitation** (millimeters)  
-- cost-distance (in hours) to **springs** and **streams**  
-- **protected** status  
-- cost-distance (in hours) to **roads**  
+Independent variables:\
+- **elevation**\
+- maize growing degree days (**gdd**, in Celsius)\
+- **precipitation** (millimeters)\
+- cost-distance (in hours) to **springs** and **streams**\
+- **protected** status\
+- cost-distance (in hours) to **roads**
 
-The climate variables, precipitation and gdd, were hindcasted for each watershed using Kyle Bocinsky's [paleocar](https://github.com/bocinsky/paleocar) package and averaged over the approximately 1,000 year occupational sequence of the Fremont in the project area. The cost-distance variables are derived from elevation data using Campbell's hiking function and Djikstra's search algorithm and averaged over each watershed. Protected status refers to the proportion of each watershed that is federal land. Note that it and cost-distance to roads are not explanatory variables, but rather controls on potential sources of sampling bias, mostly due to taphonomic processes operating on the archaeological record - basically, modern farms and cities.  
+The climate variables, precipitation and gdd, were hindcasted for each watershed
+using Kyle Bocinsky's [paleocar](https://github.com/bocinsky/paleocar) package
+and averaged over the approximately 1,000 year occupational sequence of the
+Fremont in the project area. The cost-distance variables are derived from
+elevation data using Campbell's hiking function and Djikstra's search algorithm
+and averaged over each watershed. Protected status refers to the proportion of
+each watershed that is federal land. Note that it and cost-distance to roads are
+not explanatory variables, but rather controls on potential sources of sampling
+bias, mostly due to taphonomic processes operating on the archaeological
+record - basically, modern farms and cities.
 
-Offsets:  
-- **area** of each watershed  
+Offsets:\
+- **area** of each watershed
 
-This is included to account for sampling bias owing to the size of each watershed. The other two are there to account for sampling bias owing to variable survey intensity, as well as the potential for human impacts to cultural resources.  
+This is included to account for sampling bias owing to the size of each
+watershed. The other two are there to account for sampling bias owing to
+variable survey intensity, as well as the potential for human impacts to
+cultural resources.
 
-**Note:** not all of these variables make it into the final model as we first evaluate them for potential colinearity and concurvity. An additional concurvity test is performed after fitting the final model. Not all of them have smooths applied in the final model, either.  
+**Note:** not all of these variables make it into the final model as we first
+evaluate them for potential colinearity and concurvity. An additional concurvity
+test is performed after fitting the final model. Not all of them have smooths
+applied in the final model, either.
 
 ```{r}
 
 gpkg <- here("data", "western-fremont.gpkg")
 
+watersheds <- read_sf(gpkg, "watersheds")
+
+# the following shapes are just for visualization purposes
 utah <- read_sf(gpkg, "utah")
 
-watersheds <- read_sf(gpkg, "watersheds") |> 
-  mutate(
-    huc4 = str_sub(id, 1, 4),
-    huc4 = factor(huc4)
-  )
+window <- read_sf(gpkg, "window")
+
+roads <- read_sf(gpkg, "roads") |> 
+  filter(rttyp %in% c("U", "I")) |> 
+  st_intersection(window)
+
+towns <- tigris::places("Utah", progress_bar = FALSE) |> 
+  rename_with(tolower) |> 
+  select(name) |> 
+  filter(name %in% c("Salt Lake City", "Cedar City", "Delta", "Richfield")) |> 
+  arrange(name) |> 
+  st_centroid()
 
 ```
 
-```{r}
-#| fig-height: 4
-#| code-fold: true
-#| fig-align: center
+::: {#fig-overview}
+![](../figures/overview.jpg){width="100%" fig-alt="overview map of project area"}
 
-max_density_obs <- with(watersheds, max(sites/area))
-
-obs <- ggplot() +
-  geom_sf(
-    data = utah,
-    fill = "gray95"
-  ) +
-  geom_sf(
-    data = watersheds, 
-    aes(fill = (sites/area)/max_density_obs),
-    color = "gray90", 
-    linewidth = 0.2
-  ) +
-  scale_fill_viridis(
-    name = "Relative\nSite Density",
-    option = "mako",
-    limits = c(0, 1)
-  ) +
-  # coord_sf(expand = FALSE) +
-  theme_void() +
-  theme(
-    legend.background = element_rect(fill = "gray95", color = "transparent"),
-    legend.justification = c("left", "top"),
-    legend.position = c(0.66, 0.57)
-  )
-
-obs
-
-```
-
-This map shows the relative density of sites based on their observed frequency in the study area. If site density is the ratio of the number of sites in a watershed to the area of that watershed, the _relative_ density is the density estimate for each watershed divided by the maximum density estimate across all watersheds. It is more appropriate to visualize this value as it doesn't have the same strong implications as visualizing the counts. (1) By visualizing the _density_, it does not make assumptions about the absence of sampling bias owing to the area of each watershed. (2) By visualizing the _relative_ density, it does not make assumptions about the total occurrence rate of sites across the study area, i,e, it does not include an estimate of the intercept.
+Overview map.
+:::
 
 ### Test for colinearity
 
 ```{r}
-#| fig-height: 5
-#| fig-asp: 1
+#| label: fig-correlations
 #| code-fold: true
 #| out-width: "75%"
-#| fig-align: center
+#| fig-height: 5
+#| fig-asp: 1
+#| fig-alt: "Pearson correlation matrix"
+#| fig-cap: "Pearson correlation matrix"
 
 diagonal_labels <- function(data, mapping, ...) {
 
@@ -192,17 +206,22 @@ watersheds |>
 
 ```
 
-As you can see, there are strong, linear correlations between all the variables, including the familiar inverse relationship between precipitation and gdd, which is driven by elevation in the American West. Based on this and a previous post-hoc concurvity test, we will drop springs.
+As you can see, there are strong, linear correlations between all the variables,
+including the familiar inverse relationship between precipitation and gdd, which
+is driven by elevation in the American West. Based on this and a previous
+post-hoc concurvity test, we will drop springs.
 
 ### Map of covariates
 
 ```{r}
+#| label: fig-covariates
+#| code-fold: true
 #| fig-width: 8
 #| fig-asp: 0.9
-#| code-fold: true
-#| fig-align: center
+#| fig-alt: "Map of covariates"
+#| fig-cap: "Map of covariates"
 
-make_map <- function(fill, name) {
+make_map <- function(x, fill, name) {
   
   ggplot() +
     geom_sf(
@@ -210,8 +229,8 @@ make_map <- function(fill, name) {
       fill = "gray95"
     ) +
     geom_sf(
-      data = watersheds, 
-      aes(fill = {{fill}}),
+      data = x, 
+      aes(fill = {{ fill }}),
       color = "gray90", 
       linewidth = 0.2
     ) +
@@ -219,48 +238,103 @@ make_map <- function(fill, name) {
       name = name,
       option = "mako"
     ) +
+    geom_sf(
+      data = roads |> filter(rttyp == "I"),
+      color = "white",
+      linewidth = 0.4
+    ) +
+    geom_sf(
+      data = roads |> filter(rttyp == "U"),
+      color = "white",
+      linewidth = 0.2
+    ) +
+    geom_sf(
+      data = towns,
+      fill = "white",
+      color = "gray35",
+      shape = 21,
+      size = 2
+    ) +
     theme_void() +
     theme(
       legend.background = element_rect(fill = "gray95", color = "transparent"),
       legend.justification = c("left", "bottom"),
-      legend.position = c(0.65, 0.19)
+      legend.position = c(0.65, 0.19),
+      legend.title = element_text(size = rel(0.9))
     )
   
 }
 
-for_print <- 
-  (make_map(gdd, "GDD (°C)") + make_map(precipitation, "PPT (mm)")) /
-  (make_map(streams, "Streams\n(hours)") + make_map(protected, "Protected"))
+gdd <- make_map(
+  watersheds,
+  fill = gdd,
+  name = "GDD (°C)"
+)
+
+ppt <- make_map(
+  watersheds,
+  fill = precipitation,
+  name = "PPT (mm)"
+)
+
+streams <- make_map(
+  watersheds,
+  fill = streams,
+  name = "Streams\n(hours)"
+)
+
+protected <- make_map(
+  watersheds,
+  fill = protected, 
+  name = "Protected"
+)
 
 bb8 <- st_union(watersheds, utah) |> st_bbox()
 
 dy <- bb8[["ymax"]] - bb8[["ymin"]]
 dx <- bb8[["xmax"]] - bb8[["xmin"]]
 
+fn <- here("figures", "covariates.jpg")
+
 ggsave(
-  plot = for_print,
-  filename = here("figures", "covariates.jpg"),
+  plot = (gdd + ppt) / (streams + protected),
+  filename = fn,
   width = 5.75,
   height = 5.75 * (dy/dx),
   dpi = 600
 )
 
-(make_map(gdd, "GDD (°C)") + 
-  make_map(precipitation, "PPT (mm)") +
-  make_map(streams, "Streams\n(hours)")) /
-  (make_map(springs, "Springs\n(hours)") +
-     make_map(protected, "Protected") +
-     make_map(roads, "Roads\n(hours)"))
+prepare_image(fn)
+
+springs <- make_map(
+  watersheds,
+  fill = springs, 
+  name = "Springs\n(hours)"
+)
+
+routes <- make_map(
+  watersheds,
+  fill = roads, 
+  name = "Roads\n(hours)"
+)
+
+all_covariates <- (gdd + ppt + streams) / (springs + protected + routes)
+
+remove(gdd, ppt, streams, springs, routes, protected)
+
+all_covariates
 
 ```
 
 ### Bocinsky 2014 Thresholds
 
 ```{r}
+#| label: fig-thresholds
+#| code-fold: true
 #| fig-width: 8
 #| fig-asp: 0.45
-#| code-fold: true
-#| fig-align: center
+#| fig-alt: "Histograms of temperature and precipitation"
+#| fig-cap: "Histograms of temperature and precipitation"
 
 thresholds <- tibble(
   xintercept = c(300, 1000),
@@ -287,7 +361,7 @@ pretty_breaks <- function(x) {
   
 }
 
-threshold_dists <- ggplot() +
+ggplot() +
   geom_histogram(
     data = values,
     aes(value),
@@ -332,16 +406,6 @@ threshold_dists <- ggplot() +
     strip.placement = "outside"
   )
 
-ggsave(
-  plot = threshold_dists,
-  filename = here("figures", "threshold_distributions.jpg"),
-  width = 5.75,
-  height = 5.75 * (dy/(2*dx)),
-  dpi = 600
-)
-
-threshold_dists
-  
 ```
 
 Here's what that threshold looks like in geographic space.
@@ -357,40 +421,60 @@ watersheds <- watersheds |>
 ```
 
 ```{r}
-#| fig-width: 8
-#| fig-asp: 0.45
+#| label: fig-thresholds-map
 #| code-fold: true
-#| fig-align: center
+#| fig-width: 4
+#| out-width: "4in"
+#| fig-alt: "Map of maize niche thresholds"
+#| fig-cap: "Map of maize niche thresholds"
 
-threshold_map <- ggplot() +
-    geom_sf(
-      data = utah,
-      fill = "gray95"
-    ) +
-    geom_sf(
-      data = watersheds, 
-      aes(fill = in_niche),
-      color = "gray90", 
-      linewidth = 0.2
-    ) +
-    scale_fill_viridis(
-      name = "In Niche?",
-      option = "mako",
-      end = 0.75,
-      discrete = TRUE
-    ) +
-    theme_void() +
-    theme(
-      legend.background = element_rect(fill = "gray95", color = "transparent"),
-      legend.justification = c("left", "top"),
-      legend.position = c(0.66, 0.57)
-    )
+thm <- ggplot() +
+  geom_sf(
+    data = utah,
+    fill = "gray95"
+  ) +
+  geom_sf(
+    data = watersheds, 
+    aes(fill = in_niche),
+    color = "gray90", 
+    linewidth = 0.2
+  ) +
+  scale_fill_viridis(
+    name = "In Niche?",
+    option = "mako",
+    end = 0.75,
+    discrete = TRUE
+  ) +
+  geom_sf(
+    data = roads |> filter(rttyp == "I"),
+    color = "white",
+    linewidth = 0.4
+  ) +
+  geom_sf(
+    data = roads |> filter(rttyp == "U"),
+    color = "white",
+    linewidth = 0.2
+  ) +
+  geom_sf(
+    data = towns,
+    fill = "white",
+    color = "gray35",
+    shape = 21,
+    size = 2
+  ) +
+  theme_void() +
+  theme(
+    legend.background = element_rect(fill = "gray95", color = "transparent"),
+    legend.justification = c("left", "top"),
+    legend.position = c(0.66, 0.57)
+  )
 
-obs + threshold_map
+thm
 
 ```
 
-Is there a significant difference in elevation between those in the niche and those outside it?
+Is there a significant difference in elevation between those in the niche and
+those outside it?
 
 ```{r}
 
@@ -400,7 +484,11 @@ with(watersheds, t.test(elevation ~ in_niche))
 
 ## Analysis
 
-Here, we go through iterations of model fitting and evaluation, with changes to correct for problems like autocorrelation and concurvity (the smoothed version of co-linearity in the predictors). For each fitted model, we provide a model summary, diagnostic plots, and visualizations of partial effects (sometimes called marginal responses) for each smooth term.
+Here, we go through iterations of model fitting and evaluation, with changes to
+correct for problems like autocorrelation and concurvity (the smoothed version
+of co-linearity in the predictors). For each fitted model, we provide a model
+summary, diagnostic plots, and visualizations of partial effects (sometimes
+called marginal responses) for each smooth term.
 
 ```{r}
 
@@ -424,7 +512,10 @@ summary(fremont)
 
 ### Dispersion
 
-First, an h-test for scaled dispersion in a poisson model. In a poisson model, the variance is supposed to equal the mean. If this holds, then $\alpha$ in $Var(y) = E(y) + \alpha \cdot E(y)$ should equal zero. A simple, intercept-only linear model can test this idea.
+First, an h-test for scaled dispersion in a poisson model. In a poisson model,
+the variance is supposed to equal the mean. If this holds, then $\alpha$ in
+$Var(y) = E(y) + \alpha \cdot E(y)$ should equal zero. A simple, intercept-only
+linear model can test this idea.
 
 ```{r}
 
@@ -462,7 +553,10 @@ tibble(
 
 ```
 
-Clearly, there is over-dispersion in this model. To correct for this, we re-run the model with a `negative binomial` error distribution, letting the model adjust to $\alpha$. We choose a negative binomial over a quasipoisson as it uses maximum likelihood.
+Clearly, there is over-dispersion in this model. To correct for this, we re-run
+the model with a `negative binomial` error distribution, letting the model
+adjust to $\alpha$. We choose a negative binomial over a quasipoisson as it uses
+maximum likelihood.
 
 ```{r}
 
@@ -479,7 +573,8 @@ summary(fremont)
 
 ### Residual Spatial Autocorrelation
 
-Monte Carlo simulations of Moran's I to test for spatial autocorrelation in the residuals (using sfdep).
+Monte Carlo simulations of Moran's I to test for spatial autocorrelation in the
+residuals (using sfdep).
 
 ```{r}
 
@@ -494,7 +589,10 @@ global_moran_perm(
 
 ```
 
-There's significant spatial autocorrelation. To fix this, we will use a generalized additive mixed-model (GAMM) with an exponential spatial correlation structure. This is not strictly correct, as it assumes spatial continuity of points, not polygons, but it's a useful first approximation.
+There's significant spatial autocorrelation. To fix this, we will use a
+generalized additive mixed-model (GAMM) with an exponential spatial correlation
+structure. This is not strictly correct, as it assumes spatial continuity of
+points, not polygons, but it's a useful first approximation.
 
 ### Spatial Correlation Structure
 
@@ -528,7 +626,9 @@ summary(fremont$gam)
 
 ```
 
-By accounting for spatial autocorrelation, the expected degrees of freedom for gdd and cost-distance to streams are now both 1, which suggests that there are no non-linear effects for those covariates.
+By accounting for spatial autocorrelation, the expected degrees of freedom for
+gdd and cost-distance to streams are now both 1, which suggests that there are
+no non-linear effects for those covariates.
 
 ### Concurvity
 
@@ -540,11 +640,12 @@ concurvity(fremont$gam)
 
 ```
 
-Not good... 
+Not good...
 
 ### Final model
 
-Cost-distance to roads is non-significant, so we'll remove that variable from the model entirely.
+Cost-distance to roads is non-significant, so we'll remove that variable from
+the model entirely.
 
 ```{r}
 
@@ -571,7 +672,9 @@ summary(fremont$gam)
 
 ### Final Moran's I
 
-One more Moran's I test to see if we really got a hold of the spatial autocorrelation. We'll do this with the normalized residuals of the lme inside the GAMM as that incorporates the exponential covariance matrix.
+One more Moran's I test to see if we really got a hold of the spatial
+autocorrelation. We'll do this with the normalized residuals of the lme inside
+the GAMM as that incorporates the exponential covariance matrix.
 
 ```{r}
 
@@ -587,7 +690,9 @@ Looks good!
 
 ### Variance Inflation Factor
 
-There can't be concurvity in the model anymore, as there is only one smoothed term. However, we should now check for potential multi-collinearity in the parameteric terms.
+There can't be concurvity in the model anymore, as there is only one smoothed
+term. However, we should now check for potential multi-collinearity in the
+parameteric terms.
 
 ```{r}
 
@@ -640,16 +745,14 @@ The VIF for gdd is a little high, but within acceptable limits.
 
 ### Marginal response
 
-Here we estimate the marginal responses (also known as partial effects) for each covariate by letting the target covariate vary and holding the other covariates at their means and predicting the site count (the response). Here we use the {ggeffects} package.
+Here we estimate the marginal responses (also known as partial effects) for each
+covariate by letting the target covariate vary and holding the other covariates
+at their means and predicting the site count (the response). Here we use the
+{ggeffects} package.
 
 ```{r}
-#| code-fold: true
-#| fig-align: center
-#| fig-height: 6
-#| fig.asp: 0.93
-#| out-width: "70%"
 
-margins <- ggpredict(fremont) |>
+margins <- ggpredict(fremont, condition = list(area = mean(watersheds$area))) |>
   unclass() |>
   bind_rows() |>
   as_tibble() |> # the "ggeffects" class doesn't want to let go
@@ -659,7 +762,20 @@ margins <- ggpredict(fremont) |>
     "ymin" = conf.low,
     "ymax" = conf.high,
     "variable" = group
-  ) |> 
+  )
+
+```
+
+```{r}
+#| label: fig-partials
+#| code-fold: true
+#| fig-height: 6
+#| fig.asp: 0.93
+#| out-width: "70%"
+#| fig-alt: "Partial dependence plots"
+#| fig-cap: "Partial dependence plots"
+
+margins <- margins |> 
   mutate(
     # hacky way to "clip" the ribbon before expanding in ggplot
     ymax = ifelse(ymax > 100, 100, ymax)
@@ -737,13 +853,17 @@ marginal_response <- ggplot(margins, aes(x, y)) +
     strip.text = element_blank()
   )
 
+fn <- here("figures", "marginal_response.jpg")
+
 ggsave(
   plot = marginal_response,
-  filename = here("figures", "marginal_response.jpg"),
+  filename = fn,
   width = 5,
   height = 5 * 0.93,
   dpi = 600
 )
+
+prepare_image(fn)
 
 marginal_response
 
@@ -762,85 +882,61 @@ watersheds <- watersheds |>
 ```
 
 ```{r}
+#| label: fig-model-map
+#| code-fold: true
 #| fig-width: 8
 #| fig-asp: 0.9
-#| code-fold: true
-#| fig-align: center
+#| fig-alt: "Map of estimated density"
+#| fig-cap: "Map of estimated density"
 
-basemap <- ggplot() +
-  geom_sf(
-    data = utah,
-    fill = "gray95"
-  ) +
-  theme_void() +
-  theme(
-    legend.background = element_rect(fill = "gray95", 
-                                     color = "transparent"),
-    legend.justification = c("left", "bottom"),
-    legend.position = c(0.65, 0.19)
-  )
+obs <- make_map(
+  watersheds,
+  fill = ifelse(sites == 0, log(0.00001), log(sites/area)), 
+  name = "Observed\nLog Density"
+)
 
-obs <- basemap +
-  geom_sf(
-    data = watersheds, 
-    aes(fill = (sites/area)/max_density_obs),
-    color = "gray90", 
-    linewidth = 0.1
-  ) +
-  scale_fill_viridis(
-    name = "Observed",
-    option = "mako",
-    limits = c(0, 1)
-  )
+est <- make_map(
+  watersheds,
+  log(estimate/area), 
+  "Estimated\nLog Density"
+)
 
-max_density_est <- with(watersheds, max(estimate/area))
+res <- make_map(
+  watersheds,
+  fill = residuals, 
+  name = "Normalized\nResiduals"
+)
 
-estimate <- basemap +
-  geom_sf(
-    data = watersheds, 
-    aes(fill = (estimate/area)/max_density_est),
-    color = "gray90", 
-    linewidth = 0.1
-  ) +
-  scale_fill_viridis(
-    name = "Estimated",
-    option = "mako",
-    limits = c(0, 1)
-  )
 
-res <- basemap +
-  geom_sf(
-    data = watersheds, 
-    aes(fill = residuals),
-    color = "gray90", 
-    linewidth = 0.1
-  ) +
-  scale_fill_viridis(
-    name = "Residuals",
-    option = "mako"
-  )
+fn <- here("figures", "model-map.jpg")
 
 ggsave(
-  plot = (obs + estimate),
-  filename = here("figures", "model-map.jpg"),
+  plot = (obs + est),
+  filename = fn,
   width = 5.75,
   height = 5.75 * (dy/(2*dx)),
   dpi = 600
 )
 
+prepare_image(fn)
+
+fn <- here("figures", "threshold_map.jpg")
+
 ggsave(
-  plot = (estimate + threshold_map),
-  filename = here("figures", "threshold_map.jpg"),
+  plot = (est + thm),
+  filename = fn,
   width = 5.75,
   height = 5.75 * (dy/(2*dx)),
   dpi = 600
 )
 
-(obs + estimate) / (res + threshold_map)
+prepare_image(fn)
+
+(obs + est) / (res + thm)
 
 ```
 
-Please note that the residuals are still being shown for the count-level data.
+Please note that these are normalized residuals from the LME model.
 
 ```{r}
 #| echo: false
