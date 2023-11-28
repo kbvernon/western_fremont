@@ -253,7 +253,7 @@ site_density <- ggplot() +
     linewidth = 0.1
   ) +
   scale_fill_viridis(
-    name = "Log of\nSite Density",
+    name = "Observed\nLog Density",
     option = "mako"
   ) +
   geom_sf(
@@ -277,7 +277,8 @@ site_density <- ggplot() +
   theme(
     legend.background = element_rect(fill = "gray95", color = "transparent"),
     legend.justification = c("left", "bottom"),
-    legend.position = c(0.62, 0.17)
+    legend.position = c(0.62, 0.17),
+    legend.title = element_text(size = rel(0.9))
   )
 
 # Save --------------------------------------------------------------------
