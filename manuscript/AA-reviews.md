@@ -1,21 +1,22 @@
 American Antiquity Reviewers' comments:
 
-Reviewer #1: This is a very good paper that should be published. I have a few
-minor comments and suggestions for revisions, but no major criticisms. The
-description of the model is thorough, and I appreciated the fact that the
-authors were realistic about the ambiguities and possible shortcomings of the
-model. I have some doubts about the quality of the data, but models on this
-scale require working with whatever data are available. There are also plenty of
-places where readers should be at least a little skeptical about the details of
-the model, but the authors have done a good job of anticipating potential
-questions, explaining their decisions, and even pointing out ways to improve on
-the model (like using actual site locations rather than aggregating site counts
-by watershed). I also really appreciate the fact that the code used in the
-analysis is included with the paper. I would have liked to have access to the
-data as well; I could have done a better review if I could have been able to try
-replicating the analysis. I hope the journal will make the code and data
-available as supplementary material in formats that are easy for readers to find
-and use.
+## Reviewer #1:
+
+This is a very good paper that should be published. I have a few minor comments
+and suggestions for revisions, but no major criticisms. The description of the
+model is thorough, and I appreciated the fact that the authors were realistic
+about the ambiguities and possible shortcomings of the model. I have some doubts
+about the quality of the data, but models on this scale require working with
+whatever data are available. There are also plenty of places where readers
+should be at least a little skeptical about the details of the model, but the
+authors have done a good job of anticipating potential questions, explaining
+their decisions, and even pointing out ways to improve on the model (like using
+actual site locations rather than aggregating site counts by watershed). I also
+really appreciate the fact that the code used in the analysis is included with
+the paper. I would have liked to have access to the data as well; I could have
+done a better review if I could have been able to try replicating the analysis.
+I hope the journal will make the code and data available as supplementary
+material in formats that are easy for readers to find and use.
 
 Here are my comments, roughly in the order they occur in the text:
 
@@ -62,12 +63,14 @@ doesn't have to always mean irrigation. Planting in areas near streams where the
 water table was high was probably a viable strategy in many areas, and (in the
 right places) wouldn't require irrigation.
 
-Reviewer #2: This manuscript develops and implements what for all intents and
-purposes is a deconstructed, inductive species (i.e., "site") distribution model
-(SDM) that evaluates the degree to which a variety of environmental parameters
-are associated with Fremont sites, and ostensibly with Fremont farming.
-Paraphrasing the authors' own words (on page 16), Fremont sites tend to be: (1)
-on federal land that hasn't been all that affected by urban development, where
+## Reviewer #2:
+
+This manuscript develops and implements what for all intents and purposes is a
+deconstructed, inductive species (i.e., "site") distribution model (SDM) that
+evaluates the degree to which a variety of environmental parameters are
+associated with Fremont sites, and ostensibly with Fremont farming. Paraphrasing
+the authors' own words (on page 16), Fremont sites tend to be: (1) on federal
+land that hasn't been all that affected by urban development, where
 archaeological sites are less likely to have been destroyed, (2) in places that
 are good for growing maize; (3) close to water; and (4) in areas with moderate
 precipitation. I don't think anyone would be surprised by these findings (except
@@ -187,9 +190,11 @@ almost no place was "just right" -- but rather some (but not that many, right?)
 were just right enough, and then only slightly...at least until about 700 years
 ago.
 
-Reviewer #4: Formatting/technicalities/small stuff: -There are some formatting
-/grammar issues/spelling/punctuation (for examples words with hyphens in them:
-i.e. Mod-els, sus-tained; References Cited spelled References Cites; etc.). I'm
+## Reviewer #4: 
+
+Formatting/technicalities/small stuff: -There are some formatting /grammar
+issues/spelling/punctuation (for examples words with hyphens in them: i.e.
+Mod-els, sus-tained; References Cited spelled References Cites; etc.). I'm
 assuming that the formatting stuff is just a result of bringing in the paper
 from the authors word processing file to the journals format, but they should be
 looked out for during editing. And a good copy edit to clean up all the other
@@ -277,22 +282,31 @@ farmers occupied those areas. Its larger strength is that it offers a slightly
 different take on the spread and collapse of maize agriculture in the Fremont
 region.
 
-References: Allison, James R. 2019 The Northern Frontier in the History of the
-Greater Southwest. In Interaction and Connectivity in the Greater Southwest,
-edited by Karen Harry and Barbara J. Roth, pp. 281-307. University Press of
-Colorado, Louisville, Colorado. Lekson, Stephen H. 2014 Thinking About Fremont:
-The Later Prehistory of the Great Basin and Southwest. In Archaeology in the
-Great Basin and Southwest, edited by Nancy J. Parezo and Joel C. Janetski, pp.
-109-117. University of Utah Press, Salt Lake City. Searcy, Michael T., and
-Richard K. Talbot 2016 Late Fremont Cultural Identities and Borderland
-Processes. In Late Holocene Research on Foragers and Early Farmers in the Desert
-West, edited by Barbara J. Roth and Maxine E. McBrinn, pp. 234-264. University
-of Utah Press. Talbot, Richard K. 2000 Fremont Settlement Patterns and
-Demography. In Clear Creek Canyon Archaeological Project: Results and Synthesis
-by Joel C. Janetski, Richard K. Talbot, Deborah E. Newman, Lane D. Richens, and
-James D. Wilde, pp. 201-230. Museum of Peoples and Cultures Occasional Papers
-No. 7. Brigham Young University, Provo. 2022 Great Salt Lake Fremont and Forager
-Identities and Borderland Relationships ca. A.D. 600-1300. In Casting A Wide
-Net. Papers in Honor of Joel C. Janetski, edited by Richard K. Talbot, James R.
-Allison, and Charmaine Thompson, pp. 107-149. Museum of Peoples and Cultures
-Occasional Paper No. 20. Brigham Young University, Provo, Utah.
+References:
+
+Allison, James R. 2019 The Northern Frontier in the History of the Greater
+Southwest. In Interaction and Connectivity in the Greater Southwest, edited by
+Karen Harry and Barbara J. Roth, pp. 281-307. University Press of Colorado,
+Louisville, Colorado.
+
+Lekson, Stephen H. 2014 Thinking About Fremont: The Later Prehistory of the
+Great Basin and Southwest. In Archaeology in the Great Basin and Southwest,
+edited by Nancy J. Parezo and Joel C. Janetski, pp. 109-117. University of Utah
+Press, Salt Lake City.
+
+Searcy, Michael T., and Richard K. Talbot 2016 Late Fremont Cultural Identities
+and Borderland Processes. In Late Holocene Research on Foragers and Early
+Farmers in the Desert West, edited by Barbara J. Roth and Maxine E. McBrinn, pp.
+234-264. University of Utah Press.
+
+Talbot, Richard K. 2000 Fremont Settlement Patterns and Demography. In Clear
+Creek Canyon Archaeological Project: Results and Synthesis by Joel C. Janetski,
+Richard K. Talbot, Deborah E. Newman, Lane D. Richens, and James D. Wilde, pp.
+201-230. Museum of Peoples and Cultures Occasional Papers No. 7. Brigham Young
+University, Provo. 2022
+
+Great Salt Lake Fremont and Forager Identities and Borderland Relationships ca.
+A.D. 600-1300. In Casting A Wide Net. Papers in Honor of Joel C. Janetski,
+edited by Richard K. Talbot, James R. Allison, and Charmaine Thompson, pp.
+107-149. Museum of Peoples and Cultures Occasional Paper No. 20. Brigham Young
+University, Provo, Utah.
