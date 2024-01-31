@@ -9,53 +9,10 @@
 % SIMPLE FORMATTING
 % -----------------------
 
-$if(watermark)$
-  \usepackage[color={[gray]{0.97}}]{draftwatermark}
-$endif$
-
 $if(linenumbers)$
   \usepackage[left, displaymath, mathlines]{lineno}
   \linenumbers
 $endif$
-
-% -----------------------
-% BibLaTeX
-% -----------------------
-$if(biblatex)$
-  $if(biblatex-chicago)$
-    \usepackage[
-      $if(biblio-style)$$biblio-style$,$endif$
-      $for(biblatexoptions)$$biblatexoptions$$sep$,$endfor$
-    ]{biblatex-chicago}
-  $else$
-    \usepackage[
-      $if(biblio-style)$style=$biblio-style$,$endif$
-      $for(biblatexoptions)$$biblatexoptions$$sep$,$endfor$
-    ]{biblatex}
-  $endif$
-
-  \setlength\bibitemsep{6pt}
-  \setlength\bibhang{\parindent} % Match document indentation
-  
-  % Fix biblatex's odd preference for using In: by default.
-  \renewbibmacro{in:}{%
-    \ifentrytype{article}{}{%
-      \printtext{\bibstring{}
-      \intitlepunct}
-    }
-  }
-  
-  \addbibresource{$bibliography$}
-  
-  % Start bibliography on new page
-  \pretocmd{\printbibliography}{\clearpage\singlespace}{}{}
-  
-  \AtBeginBibliography{\vspace*{10pt}} %increase space between title and first entry
-$endif$
-
-% This has to come at the end of the preamble, after any biblatex stuff because 
-% some biblatex styles (like APA) define their own \urlstyle{}
-\urlstyle{same} % don't use monospace font for urls
 
 % ----------------------- 
 % Title block elements

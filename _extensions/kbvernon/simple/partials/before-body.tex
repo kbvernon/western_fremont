@@ -28,9 +28,9 @@ $endif$
 
 \vfill  % Fill the rest of the page with whitespace
 
-% $if(author.attributes.corresponding)$
-%   \correspond{\href{mailto:$author.email$}}
-% $endif$
+$if(corresponding_author)$
+  \correspond{\url{$corresponding_author$}}
+$endif$
 
 \end{singlespace}
 

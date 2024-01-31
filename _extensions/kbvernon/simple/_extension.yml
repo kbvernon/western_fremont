@@ -6,13 +6,14 @@ contributes:
     pdf:
       documentclass: article
       papersize: letter
-      fontsize: 11pt
-      linestretch: 1.75
+      fontsize: 12pt
+      linestretch: 1.8
+      csl: apa.csl
 
       # Template pieces
       template-partials:
-        - "title.tex"
-        - "before-body.tex"
+        - "partials/title.tex"
+        - "partials/before-body.tex"
       include-in-header:
         - "include-in-header.tex"
       
@@ -25,18 +26,14 @@ contributes:
 
       # Citations and links
       colorlinks: true
-      linkcolor: MediumBlue
-      urlcolor: MediumBlue
-      citecolor: DarkRed
+      linkcolor: DarkSlateBlue
+      urlcolor: DarkSlateBlue
+      citecolor: DarkSlateBlue
       link-citations: true
 
       # Sections
       number-sections: true
       number-depth: 3
-      
-      # Bibliography
-      biblio-title: "References"
-      csl: chicago-author-date.csl 
       
       # The titlesec package provides its own mechanism for dealing with 
       # inline/block headings, so we need to disable pandoc's support for it
