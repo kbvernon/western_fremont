@@ -1,22 +1,5 @@
 
 # Site distribution for the western Fremont -- Data Wrangling
-# Vernon 2022
-
-##############################.
-#     Table of Contents
-# 01. Preamble
-# 02. Utah polygon
-# 03. Watersheds 
-# 04. Sites
-# 05. Digital Elevation Model (DEM)
-# 06. Land ownership
-# 07. Water features
-# 08. Roads
-# 09. PRISM
-# 10. Tree Rings (ITRDB)
-# 11. Cost-distance
-# 12. Extract all data into watersheds 
-##############################.
 
 # Note:
 # 1- Sensitive site data cannot be shared directly, so you'll need to get it
@@ -116,7 +99,7 @@ remove(bob)
 # 04) SITES ---------------------------------------------------------------
 
 sites <- read_sf(
-  "E:/fremont.gpkg", # <--- can't be run without site data
+  here(".misc", "fremont.gpkg"), # <--- can't be run without site data
   layer = "centroids"
 ) |> 
   st_filter(window)
