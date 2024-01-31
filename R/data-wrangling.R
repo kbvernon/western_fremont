@@ -23,19 +23,10 @@ gpkg <- here("data", "western-fremont.gpkg")
 # coordinate reference 
 # EPSG:26912
 
-# load custom functions
-# doing it this way to mask the functions in the global environment
-sys.source(
-  here("R", "fun-download_features.R"), # requires httr and jsonlite
-  envir = attach(NULL, name = "features")
-)
+# requires httr and jsonlite
+here("R", "fun-download_features.R") |> source()
 
-sys.source(
-  here("R", "fun-extractors.R"),
-  envir = attach(NULL, name = "extractors")
-)
-
-# use ls(features) or ls(extractors) to see the functions
+here("R", "fun-extractors.R") |> source()
 
 # 02) UTAH POLYGON --------------------------------------------------------
 
