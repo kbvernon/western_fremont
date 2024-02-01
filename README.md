@@ -20,11 +20,10 @@ This repository contains the data and code for our paper:
 > and Brian F. Codding
 > [![](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0001-7977-8568)
 > (2023). The Fremont Frontier: Living at the Margins of Maize Farming.
-> *Quaternary International*.
+> *American Antiquity*.
 
 **Preprint**: [manuscript.pdf](/manuscript/manuscript.pdf)  
-
-**Supplement**: [/R/analysis.html](/R/analysis.html)  
+**Supplement**: [analysis.html](https://kbvernon.github.io/western-fremont/R/analysis.html)  
 
 ## Contents  
 
