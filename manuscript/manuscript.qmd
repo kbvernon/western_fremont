@@ -430,7 +430,9 @@ temperature estimates from the \~800 m resolution PRISM dataset
 [@prismclimategroup2019] and all tree-ring samples in North America, which were
 obtained from the International Tree Ring Database using FedData. For each
 watershed, we took the median values of precipitation and GDD over the Fremont
-sequence.
+sequence. Although we calculated these results manually, we note that comparable
+estimates are now more easily obtained through the open, geospatial climate data
+portal, SKOPE [@bocinsky_etal2023].
 
 @fig-covariates shows the geographic distributions of these covariates over
 watersheds. Orographic effects (meaning the effects of mountains and elevation)
