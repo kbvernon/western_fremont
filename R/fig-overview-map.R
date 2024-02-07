@@ -27,16 +27,8 @@ library(viridis)
 gpkg <- here("data", "western-fremont.gpkg")
 
 # load custom functions
-# doing it this way to mask the functions in the global environment
-sys.source(
-  here("R", "fun-get_basemap.R"),
-  envir = attach(NULL, name = "basemap")
-)
-
-sys.source(
-  here("R", "fun-prepare-image.R"),
-  envir = attach(NULL, name = "image")
-)
+here("R", "fun-get_basemap.R") |> source()
+here("R", "fun-prepare-image.R") |> source()
 
 # features ----------------------------------------------------------------
 
