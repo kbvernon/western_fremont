@@ -51,10 +51,8 @@ model\
 
 All scripts for conducting analysis and generating figures assume that the data
 can be found in a GeoPackage database called `data/western-fremont.gpkg`.
-Unfortunately, a GeoPackage is not amenable to git integration, so we have to
-store it somewhere else, in this case Zenodo. Assuming you're in the
-`western_fremont` project folder, the following should be sufficient to get a
-local copy of the database:
+Assuming you're in the `western_fremont` project folder, the following code 
+should be sufficient to do that:
 
 ``` r
 library(here)
