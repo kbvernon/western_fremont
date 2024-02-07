@@ -25,7 +25,6 @@ figcaption {
 }
 ```
 
-
 ## Overview
 
 **Goal**: model the distribution of Fremont sites across watersheds.
@@ -128,7 +127,8 @@ towns <- tigris::places("Utah", progress_bar = FALSE) |>
 ```
 
 ::: {#fig-overview}
-![](../figures/overview.jpg){width="100%" fig-alt="overview map of project area"}
+![](../figures/overview.jpg){width="100%"
+fig-alt="overview map of project area"}
 
 Overview map.
 :::
