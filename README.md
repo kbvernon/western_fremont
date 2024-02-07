@@ -1,5 +1,4 @@
-
-# western_fremont  
+# western_fremont
 
 <!-- badges: start -->
 
@@ -22,54 +21,55 @@ This repository contains the data and code for our paper:
 > (2024). The Fremont Frontier: Living at the Margins of Maize Farming.
 > *American Antiquity*.
 
-**Preprint**: [manuscript.pdf](/manuscript/manuscript.pdf)  
-**Supplement**: [analysis.html](https://kbvernon.github.io/western-fremont/R/analysis.html)  
+**Preprint**: [manuscript.pdf](/manuscript/manuscript.pdf)\
+**Supplement**:
+[analysis.html](https://kbvernon.github.io/western-fremont/R/analysis.html)
 
-## Contents  
+## Contents
 
-📂 [_extensions](/_extensions) has Quarto extension for compiling manuscript  
-📂 [data](/data) required for reproducing analysis and figures  
-&emsp;&emsp;&RightTee; 💾 [villages.csv](data/villages.csv)  
-&emsp;&emsp;&RightTee; 🌎 western-fremont.gpkg is a GeoPackage database with all necessary data  
-&emsp;&emsp;&RightTee; 📈 elevation-everything.csv is the coefficient table for the elevation model  
-&emsp;&emsp;&RightTee; 📈 western-fremont-model.Rds is the final model  
-📂 [figures](/figures) contains all figures included in the paper  
-📂 [manuscript](/manuscript) contains the pre-print  
-&emsp;&emsp;&RightTee; 📄 [manuscript.qmd](/manuscript/manuscript.qmd)  
-&emsp;&emsp;&RightTee; 📄 [manuscript.pdf](/manuscript/manuscript.pdf)  
-📂 [R](/R) code for preparing data and conducting analysis, including  
-&emsp;&emsp;&RightTee; 📄 [analysis.qmd](/R/analysis.qmd) is the primary analysis,  
-&emsp;&emsp;&RightTee; 📄 [cost-distance.R](/R/cost-distance.R),  
-&emsp;&emsp;&RightTee; 📄 [data-wrangling.R](/R/data-wrangling.R),  
-&emsp;&emsp;&RightTee; 📄 [paleocar.R](/R/paleocar.R),  
-&emsp;&emsp;&RightTee; 📄 [prism.R](/R/prism.R),  
-&emsp;&emsp;&RightTee; 📄 [regression-table.R](/R/regression-table.R), and  
-&emsp;&emsp;&RightTee; various scripts with helper functions  
+📂 [\_extensions](/_extensions) has Quarto extension for compiling manuscript\
+📂 [data](/data) required for reproducing analysis and figures\
+  ⊢ 💾 [villages.csv](data/villages.csv)\
+  ⊢ 🌎 western-fremont.gpkg is a GeoPackage database with all necessary data\
+  ⊢ 📈 elevation-everything.csv is the coefficient table for the elevation
+model\
+  ⊢ 📈 western-fremont-model.Rds is the final model\
+📂 [figures](/figures) contains all figures included in the paper\
+📂 [manuscript](/manuscript) contains the pre-print\
+  ⊢ 📄 [manuscript.qmd](/manuscript/manuscript.qmd)\
+  ⊢ 📄 [manuscript.pdf](/manuscript/manuscript.pdf)\
+📂 [R](/R) code for preparing data and conducting analysis, including\
+  ⊢ 📄 [analysis.qmd](/R/analysis.qmd) is the primary analysis,\
+  ⊢ 📄 [cost-distance.R](/R/cost-distance.R),\
+  ⊢ 📄 [data-wrangling.R](/R/data-wrangling.R),\
+  ⊢ 📄 [paleocar.R](/R/paleocar.R),\
+  ⊢ 📄 [prism.R](/R/prism.R),\
+  ⊢ 📄 [regression-table.R](/R/regression-table.R), and\
+  ⊢ various scripts with helper functions
 
-## 🌎 How to Rebuild GeoPackage Database  
+## 🌎 How to Rebuild GeoPackage Database
 
-All scripts for conducting analysis and generating figures assume that
-the data can be found in a GeoPackage database called
-`data/western-fremont.gpkg`. Unfortunately, a GeoPackage is not amenable
-to git integration, so we have to store it somewhere else, in this case
-Zenodo. Assuming you're in the `western_fremont` project folder, the following
-should be sufficient to get a local copy of the database:  
+All scripts for conducting analysis and generating figures assume that the data
+can be found in a GeoPackage database called `data/western-fremont.gpkg`.
+Unfortunately, a GeoPackage is not amenable to git integration, so we have to
+store it somewhere else, in this case Zenodo. Assuming you're in the
+`western_fremont` project folder, the following should be sufficient to get a
+local copy of the database:
 
-```r
+``` r
 library(here)
 
 here("R", "rebuild-geopackage-database.R") |> source()
-
 ```
 
-Maybe, anyway, I haven't actually tested this.
+Maybe, anyway, I haven't actually tested this... 😰🤞
 
 ## 📈 Replicate analysis
 
 Once you have the GeoPackage built, the code to replicate the analysis and
-generate the figures is this: 
+generate the figures is this:
 
-```r
+``` r
 library(quarto)
 
 # needs to be run in this order
@@ -80,14 +80,13 @@ here("R", "analysis.qmd") |> quarto_render()
 # if you have a hankerin' to compile the manuscript (I mean, why stop now?)
 # you can do that like so:
 here("manuscript", "manuscript.qmd") |> quarto_render()
-
 ```
 
-## License  
+## License
 
 **Text and figures:** [CC-BY-4.0](http://creativecommons.org/licenses/by/4.0/)
 
 **Code:** [MIT](LICENSE.md)
 
-**Data:** [CC-0](http://creativecommons.org/publicdomain/zero/1.0/)
-attribution requested in reuse.
+**Data:** [CC-0](http://creativecommons.org/publicdomain/zero/1.0/) attribution
+requested in reuse.
