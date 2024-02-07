@@ -19,7 +19,7 @@ This repository contains the data and code for our paper:
 > [![](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0002-6810-1911),
 > and Brian F. Codding
 > [![](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0001-7977-8568)
-> (2023). The Fremont Frontier: Living at the Margins of Maize Farming.
+> (2024). The Fremont Frontier: Living at the Margins of Maize Farming.
 > *American Antiquity*.
 
 **Preprint**: [manuscript.pdf](/manuscript/manuscript.pdf)  
@@ -52,15 +52,35 @@ All scripts for conducting analysis and generating figures assume that
 the data can be found in a GeoPackage database called
 `data/western-fremont.gpkg`. Unfortunately, a GeoPackage is not amenable
 to git integration, so we have to store it somewhere else, in this case
-Zenodo. Assuming you're in the `western-fremont` project folder, the following
-is sufficient to get a local copy of the database:  
+Zenodo. Assuming you're in the `western_fremont` project folder, the following
+should be sufficient to get a local copy of the database:  
+
+```r
+library(here)
+
+here("R", "rebuild-geopackage-database.R") |> source()
 
 ```
-download.file(
-  url = "https://zenodo.org/record/<record-id-here>/western-fremont.gpkg?download=1", 
-  destfile = "./data/western-fremont.gpkg", 
-  mode = "wb"
-)
+
+Maybe, anyway, I haven't actually tested this.
+
+## 📈 Replicate analysis
+
+Once you have the GeoPackage built, the code to replicate the analysis and
+generate the figures is this: 
+
+```r
+library(quarto)
+
+# needs to be run in this order
+here("R", "fig-elevation-tradeoffs.R") |> source()
+here("R", "fig-overview-maps.R") |> source()
+here("R", "analysis.qmd") |> quarto_render()
+
+# if you have a hankerin' to compile the manuscript (I mean, why stop now?)
+# you can do that like so:
+here("manuscript", "manuscript.qmd") |> quarto_render()
+
 ```
 
 ## License  
