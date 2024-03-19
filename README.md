@@ -36,6 +36,9 @@ model\
   ⊢ 📈 western-fremont-model.Rds is the final model\
 📂 [figures](/figures) contains all figures included in the paper\
 📂 [manuscript](/manuscript) contains the pre-print\
+  ⊢ 📄 [AA-reviews.md](/manuscript/AA-reviews.md)\
+  ⊢ 📄 [bibliography.bib](/manuscript/bibliography.bib)\
+  ⊢ 📄 [cover-letter-response-to-reviews.md](/manuscript/cover-letter-response-to-reviews.md)\
   ⊢ 📄 [manuscript.qmd](/manuscript/manuscript.qmd)\
   ⊢ 📄 [manuscript.pdf](/manuscript/manuscript.pdf)\
 📂 [R](/R) code for preparing data and conducting analysis, including\
@@ -51,7 +54,7 @@ model\
 
 All scripts for conducting analysis and generating figures assume that the data
 can be found in a GeoPackage database called `data/western-fremont.gpkg`.
-Assuming you're in the `western_fremont` project folder, the following code 
+Assuming you're in the `western_fremont` project folder, the following code
 should be sufficient to do that:
 
 ``` r
