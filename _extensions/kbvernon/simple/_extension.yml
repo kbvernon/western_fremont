@@ -8,7 +8,7 @@ contributes:
       papersize: letter
       fontsize: 12pt
       linestretch: 1.8
-      csl: apa.csl
+      csl: society-for-american-archaeology.csl
 
       # Template pieces
       template-partials:

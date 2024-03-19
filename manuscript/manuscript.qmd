@@ -856,7 +856,7 @@ depended.
 
 \pagebreak
 
-# References
+# References Cited
 
 ::: {#refs}
 :::
